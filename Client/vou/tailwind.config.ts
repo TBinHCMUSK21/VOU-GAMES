@@ -13,8 +13,8 @@ const config: Config = {
 				secondary: ["var(--font-roboto)"],
 			},
 			colors: {
-				primary: "#a00061",
-				secondary: "#FFD6E7",
+				primary: "#8710d8",
+				secondary: "#5022c3",
 			},
 		},
 	},

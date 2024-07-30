@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { manrope } from "@/utils";
+import { manrope, roboto } from "@/utils";
 
 export const metadata: Metadata = {
 	title: "Vou Game",
@@ -14,7 +14,10 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en">
-			<body className={manrope.className} suppressHydrationWarning={true}>
+			<body
+				className={`${manrope.className} ${roboto.className} `}
+				suppressHydrationWarning={true}
+			>
 				{children}
 			</body>
 		</html>
