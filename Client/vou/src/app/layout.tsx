@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { manrope, roboto } from "@/utils";
+import { manrope } from "@/utils";
+import { ClerkProvider } from "@clerk/nextjs";
 
 export const metadata: Metadata = {
-	title: "Vou Game",
-	description: "This is a real time game created by VOU team",
+	title: "VOU",
+	description: "Trying to Playing With Your Friend.",
 };
 
 export default function RootLayout({
@@ -13,13 +14,12 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en">
-			<body
-				className={`${manrope.className} ${roboto.className} `}
-				suppressHydrationWarning={true}
-			>
-				{children}
-			</body>
-		</html>
+		<ClerkProvider>
+			<html lang="en" suppressHydrationWarning={true}>
+				<body className={manrope.className} suppressHydrationWarning={true}>
+					{children}
+				</body>
+			</html>
+		</ClerkProvider>
 	);
 }
