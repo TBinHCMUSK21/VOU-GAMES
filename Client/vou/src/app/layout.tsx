@@ -14,7 +14,13 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<ClerkProvider>
+		<ClerkProvider
+			appearance={{
+				layout: {
+					unsafe_disableDevelopmentModeWarnings: true,
+				},
+			}}
+		>
 			<html lang="en" suppressHydrationWarning={true}>
 				<body className={manrope.className} suppressHydrationWarning={true}>
 					{children}
