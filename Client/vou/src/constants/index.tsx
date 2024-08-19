@@ -9,12 +9,12 @@ import { TMenuItem } from "@/types/index.d";
 export const menuItems: TMenuItem[] = [
 	{
 		url: "/",
-		title: "Trang chủ",
+		title: "VOU",
 		icon: <IconHome className="size-5" />,
 	},
 	{
 		url: "/event",
-		title: "Sự kiện đang diễn ra",
+		title: "Sự kiện",
 		icon: <IconEvent className="size-5" />,
 	},
 	{
