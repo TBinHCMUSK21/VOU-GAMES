@@ -28,6 +28,8 @@ public class UserController {
         String clerkId = (String) payload.get("clerkId");
         String avatar = (String) payload.get("avatar");
         String createdAtStr = (String) payload.get("createdAt");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX");
+        LocalDateTime createdAt = ZonedDateTime.parse(createdAtStr, formatter).toLocalDateTime();
         String dob = (String) payload.get("dob");
         String email = (String) payload.get("email");
         String gender = (String) payload.get("gender");
@@ -36,21 +38,7 @@ public class UserController {
         String role = (String) payload.get("role");
         String username = (String) payload.get("username");
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX");
-        ZonedDateTime zonedDateTime = ZonedDateTime.parse(createdAtStr, formatter);
-        LocalDateTime createdAt = zonedDateTime.toLocalDateTime();
-
-        User user = new User();
-        user.setClerkId(clerkId);
-        user.setAvatar(avatar);
-        user.setCreatedAt(createdAt);
-        user.setDob(dob);
-        user.setEmail(email);
-        user.setGender(gender);
-        user.setName(name);
-        user.setPhoneNumber(phoneNumber);
-        user.setRole(role);
-        user.setUsername(username);
+        User user = new User(clerkId, avatar, createdAt, dob, email, gender, name, phoneNumber, role, username);
 
         userService.saveUser(user);
 

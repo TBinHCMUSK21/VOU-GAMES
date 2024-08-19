@@ -41,6 +41,22 @@ public class User {
     @Column(name = "username", length = 45)
     private String username;
 
+    public User() {
+    }
+
+    public User(String clerkId, String avatar, LocalDateTime createdAt, String dob, String email, String gender, String name, String phoneNumber, String role, String username) {
+        this.clerkId = clerkId;
+        this.avatar = avatar;
+        this.createdAt = createdAt;
+        this.dob = dob;
+        this.email = email;
+        this.gender = gender;
+        this.name = name;
+        this.phoneNumber = phoneNumber;
+        this.role = role;
+        this.username = username;
+    }
+
     public String getClerkId() {
         return clerkId;
     }
