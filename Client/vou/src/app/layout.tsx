@@ -1,5 +1,6 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
+import { manrope } from "@/utils";
 export default function RootLayout({
 	children,
 }: Readonly<{
@@ -7,8 +8,10 @@ export default function RootLayout({
 }>) {
 	return (
 		<ClerkProvider>
-			<html lang="en">
-				<body>{children}</body>
+			<html lang="en" suppressHydrationWarning={true}>
+				<body className={manrope.className} suppressHydrationWarning={true}>
+					{children}
+				</body>
 			</html>
 		</ClerkProvider>
 	);
