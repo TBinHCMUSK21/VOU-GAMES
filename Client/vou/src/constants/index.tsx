@@ -29,7 +29,7 @@ export const menuItems: TMenuItem[] = [
 	},
 	{
 		url: "/user",
-		title: "Tôi",
+		title: "Cá nhân",
 		icon: <IconUser className="size-5" />,
 	},
 	{
