@@ -47,6 +47,13 @@ export async function POST(req: Request) {
 
 		const url = `${process.env.NEXT_PUBLIC_API_URL}/api/users`;
 
+		// Sử dụng giá trị mặc định nếu các trường không tồn tại
+		const email = email_addresses?.[0]?.email_address ?? "";
+		const avatar = image_url ?? "";
+		const name = `${first_name ?? ""} ${last_name ?? ""}`.trim();
+		const phoneNumber = phone_numbers?.[0]?.phone_number ?? "";
+		const createdAt = new Date().toISOString();
+
 		const response = await fetch(url, {
 			method: "POST",
 			headers: {
@@ -54,16 +61,15 @@ export async function POST(req: Request) {
 			},
 			body: JSON.stringify({
 				clerkId: id,
-				avatar: image_url,
-				createdAt: new Date().toISOString(),
+				avatar: avatar,
+				createdAt: createdAt,
 				dob: null,
-				email: email_addresses[0].email_address,
+				email: email,
 				gender: null,
-				name: (last_name ?? "") + " " + (first_name ?? ""),
-				phoneNumber:
-					phone_numbers && phone_numbers.length > 0 ? phone_numbers[0] : "",
+				name: name,
+				phoneNumber: phoneNumber,
 				role: "USER",
-				username: username,
+				username: username ?? "",
 			}),
 		});
 
