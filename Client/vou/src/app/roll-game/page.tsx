@@ -2,7 +2,10 @@
 
 import React, { useState } from 'react'
 import IconLeftArrow from '@/components/icons/IconLeftArrow'
-const index = () => {
+import PlayIcon from '@/components/icons/PlayIcon';
+import shakeStyle from './shake.module.css';
+
+export default function IndexComponent() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [numberClick, setNumberClick] = useState(5);
 
@@ -18,35 +21,192 @@ const index = () => {
     setIsModalOpen(false);
   };
   return (
-<div className="bg-gray-100 flex items-center justify-center h-screen relative">
+  <div
+    className="bg-gray-100 flex items-center justify-center h-screen"
+    style={{
+      width: "100%",
+      maxWidth: "430px",
+      margin: "0 auto",
+      position: "relative",
+      flexDirection: "column",
+      justifyContent: "center",
+      alignItems: "center",
+      display: "flex",
+      background: "linear-gradient(135deg, #ff7e5f, #feb47b)"
+    }}
+  >
       {/* Back Button */}
       <button
-        className="absolute top-4 left-4 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-full"
+        className="absolute top-4 left-4 bg-black text-white font-bold py-2 px-4 rounded-full shadow-3xl hover:bg-gray-800"
+        style={{
+          boxShadow: "inset -4px -4px 10px rgba(255, 255, 255, 0.3), inset 4px 4px 10px rgba(0, 0, 0, 0.7)",
+        }}
       >
         <IconLeftArrow className="size-5" />
+        <span
+          style={{
+            content: '',
+            position: "absolute",
+            top: "8px",
+            left: "8px",
+            width: "5px",
+            height: "5px",
+            backgroundColor: "white",
+            borderRadius: "50%",
+            boxShadow: "0px 0px 5px rgba(255, 255, 255, 0.5)",
+          }}
+        />
       </button>
 
       <div className="text-center">
-        <div className="mb-8">
+        <div className="mb-8 flex items-center justify-center ">
           <button
+            className="relative bg-red-600 text-white font-bold rounded-full"
+            style={{
+              width: "80px", // Adjust the size as needed
+              height: "80px",
+              boxShadow: "inset -4px -4px 10px rgba(255, 255, 255, 0.3), inset 4px 4px 10px rgba(0, 0, 0, 0.7)",
+              position: "relative",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              border: "none",
+              outline: "none",
+            }}
             onClick={handleShakeClick}
-            className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 px-8 rounded-full text-xl"
           >
-            Shake Now
+            <span
+              style={{
+                position: "absolute",
+                top: "10px",
+                left: "10px",
+                width: "5px",
+                height: "5px",
+                backgroundColor: "white",
+                borderRadius: "50%",
+                boxShadow: "0px 0px 5px rgba(255, 255, 255, 0.5)",
+              }}
+            />
+            <PlayIcon className="size-5" />
           </button>
+
         </div>
-        <div>
+        <div className='mb-8'>
           <p className="text-gray-700 text-lg">
             Shakes Left: <span>{numberClick}</span>
           </p>
         </div>
-        <div className="mb-8">
+        <div className="mb-2">
           {/* button to view inventory */}
           <button
-            className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-full"
+            className="bg-gray-200   hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-full relative"
+            style={{
+              minWidth: "320px",
+              boxShadow: "inset -4px -4px 10px rgba(255, 255, 255, 0.6), inset 4px 4px 10px rgba(0, 0, 0, 0.2)",
+              position: "relative",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
           >
             Inventory
-            </button>
+            <span
+              style={{
+                position: "absolute",
+                top: "10px",
+                left: "10px",
+                width: "5px",
+                height: "5px",
+                backgroundColor: "white",
+                borderRadius: "50%",
+                boxShadow: "0px 0px 5px rgba(255, 255, 255, 0.5)",
+              }}
+            />
+          </button>
+        </div>
+        <div className="mb-2">
+          {/* button to share */}
+          <button
+            className="bg-gray-200   hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-full relative"
+            style={{
+              minWidth: "320px",
+              boxShadow: "inset -4px -4px 10px rgba(255, 255, 255, 0.6), inset 4px 4px 10px rgba(0, 0, 0, 0.2)",
+              position: "relative",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            Find more shakes
+            <span
+              style={{
+                position: "absolute",
+                top: "10px",
+                left: "10px",
+                width: "5px",
+                height: "5px",
+                backgroundColor: "white",
+                borderRadius: "50%",
+                boxShadow: "0px 0px 5px rgba(255, 255, 255, 0.5)",
+              }}
+            />
+          </button>
+        </div>
+        <div className="mb-2">
+          {/* button to trade */}
+          <button
+            className="bg-gray-200   hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-full relative"
+            style={{
+              minWidth: "320px",
+              boxShadow: "inset -4px -4px 10px rgba(255, 255, 255, 0.6), inset 4px 4px 10px rgba(0, 0, 0, 0.2)",
+              position: "relative",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            Trade with friends
+            <span
+              style={{
+                position: "absolute",
+                top: "10px",
+                left: "10px",
+                width: "5px",
+                height: "5px",
+                backgroundColor: "white",
+                borderRadius: "50%",
+                boxShadow: "0px 0px 5px rgba(255, 255, 255, 0.5)",
+              }}
+            />
+          </button>
+        </div>
+        <div className="mb-2">
+          {/* button to gift */}
+          <button
+            className="bg-gray-200   hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-full relative"
+            style={{
+              minWidth: "320px",
+              boxShadow: "inset -4px -4px 10px rgba(255, 255, 255, 0.6), inset 4px 4px 10px rgba(0, 0, 0, 0.2)",
+              position: "relative",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            Gift items to friends
+            <span
+              style={{
+                position: "absolute",
+                top: "10px",
+                left: "10px",
+                width: "5px",
+                height: "5px",
+                backgroundColor: "white",
+                borderRadius: "50%",
+                boxShadow: "0px 0px 5px rgba(255, 255, 255, 0.5)",
+              }}
+            />
+          </button>
         </div>
       </div>
 
@@ -65,8 +225,6 @@ const index = () => {
           </div>
         </div>
       )}
-</div>
+  </div>
   )
 }
-
-export default index
