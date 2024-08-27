@@ -2,9 +2,9 @@ const page = ({
 	searchParams,
 }: {
 	searchParams: {
-		shakegame: string;
 		brand: string;
 		event: string;
+		shakegame: string;
 	};
 }) => {
 	const { brand, event, shakegame } = searchParams;
