@@ -1,25 +1,18 @@
-import type { Metadata } from "next";
+import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
-import { manrope, roboto } from "@/utils";
-
-export const metadata: Metadata = {
-	title: "Vou Game",
-	description: "This is a real time game created by VOU team",
-};
-
+import { manrope } from "@/utils";
 export default function RootLayout({
 	children,
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en">
-			<body
-				className={`${manrope.className} ${roboto.className} `}
-				suppressHydrationWarning={true}
-			>
-				{children}
-			</body>
-		</html>
+		<ClerkProvider>
+			<html lang="en" suppressHydrationWarning={true}>
+				<body className={manrope.className} suppressHydrationWarning={true}>
+					{children}
+				</body>
+			</html>
+		</ClerkProvider>
 	);
 }
