@@ -72,7 +72,7 @@ const Page = ({
 	const timeRemaining = "00:45";
 
 	return (
-		<>
+		<div className="p-6">
 			{/* Thông tin câu hỏi */}
 			<div className="flex flex-col items-center justify-start w-full">
 				{/* Phần thông tin phía trên câu hỏi cố định */}
@@ -166,7 +166,7 @@ const Page = ({
 					{score}
 				</div>
 			</div>
-		</>
+		</div>
 	);
 };
 
