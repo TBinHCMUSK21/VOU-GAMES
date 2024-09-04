@@ -5,55 +5,18 @@ import { CompatClient } from "@stomp/stompjs";
 import IconMusic from "@/components/icons/IconMusic";
 import IconTrophy from "@/components/icons/IconTrophy";
 import { Question, QuizSearchParams } from "@/types";
-
-const mockQuestions: Question[] = [
-	{
-		id: 1,
-		questionText: "Câu hỏi 1: Thủ đô của nước Anh là gì?",
-		options: [
-			{ id: 1, text: "Paris", color: "bg-red-500", isCorrect: false },
-			{ id: 2, text: "London", color: "bg-blue-500", isCorrect: true },
-			{ id: 3, text: "Berlin", color: "bg-yellow-500", isCorrect: false },
-			{ id: 4, text: "Madrid", color: "bg-green-500", isCorrect: false },
-		],
-		timeRemaining: 10,
-	},
-	{
-		id: 2,
-		questionText: "Câu hỏi 2: Thủ đô của Nhật Bản là gì?",
-		options: [
-			{ id: 1, text: "Tokyo", color: "bg-red-500", isCorrect: true },
-			{ id: 2, text: "Osaka", color: "bg-blue-500", isCorrect: false },
-			{ id: 3, text: "Kyoto", color: "bg-yellow-500", isCorrect: false },
-			{ id: 4, text: "Nagoya", color: "bg-green-500", isCorrect: false },
-		],
-		timeRemaining: 10,
-	},
-	{
-		id: 3,
-		questionText: "Câu hỏi 3: Nguyên tố nào có ký hiệu hóa học là 'O'?",
-		options: [
-			{ id: 1, text: "Oxygen", color: "bg-red-500", isCorrect: true },
-			{ id: 2, text: "Gold", color: "bg-blue-500", isCorrect: false },
-			{ id: 3, text: "Silver", color: "bg-yellow-500", isCorrect: false },
-			{ id: 4, text: "Osmium", color: "bg-green-500", isCorrect: false },
-		],
-		timeRemaining: 10,
-	},
-];
+import axios from "axios";
 
 const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 	const { quiz } = searchParams;
 	const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-	const [timeRemaining, setTimeRemaining] = useState(
-		mockQuestions[0].timeRemaining || 10
-	);
-	const [questions, setQuestions] = useState<Question[]>(mockQuestions);
+	const [timeRemaining, setTimeRemaining] = useState(10);
+	const [questions, setQuestions] = useState<Question[]>([]);
 	const [isQuizCompleted, setIsQuizCompleted] = useState(false);
-	const [answerStatus, setAnswerStatus] = useState<null | boolean>(null); 
-	const [showPopup, setShowPopup] = useState(false); 
-	const [popupTimer, setPopupTimer] = useState(10); 
-	const [isAnswered, setIsAnswered] = useState(false); 
+	const [answerStatus, setAnswerStatus] = useState<null | boolean>(null);
+	const [showPopup, setShowPopup] = useState(false);
+	const [popupTimer, setPopupTimer] = useState(10);
+	const [isAnswered, setIsAnswered] = useState(false);
 	const popupRef = useRef<NodeJS.Timeout | null>(null);
 	const stompClient = useRef<CompatClient | null>(null);
 
@@ -62,20 +25,33 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 	const rank = 5;
 	const username = "Lê Tuấn Bình";
 
+	const fetchQuestions = useCallback(async () => {
+		try {
+			const response = await axios.get(`/api/quiz/${quiz}`);
+			setQuestions(response.data);
+			setTimeRemaining(response.data[0]?.timeRemaining || 10);
+		} catch (error) {
+			console.error("Error fetching quiz questions:", error);
+		}
+	}, [quiz]);
+
+	useEffect(() => {
+		fetchQuestions();
+	}, [fetchQuestions]);
+
 	// Hàm xử lý câu trả lời
 	const handleAnswerSubmit = useCallback(
 		(answerId: number | null) => {
-			// Nếu hết thời gian mà chưa trả lời thì tự động coi như sai
-			let isCorrect = false;
+			let correct = false;
 			if (answerId !== null) {
 				const selectedOption = questions[currentQuestionIndex].options.find(
 					(option) => option.id === answerId
 				);
-				isCorrect = selectedOption?.isCorrect || false;
+				correct = selectedOption?.correct || false;
 			}
 
 			// Cập nhật trạng thái câu trả lời và hiển thị popup
-			setAnswerStatus(isCorrect);
+			setAnswerStatus(correct);
 			setShowPopup(true);
 			setIsAnswered(true);
 		},
@@ -88,11 +64,11 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 			if (prevIndex < questions.length - 1) {
 				const nextIndex = prevIndex + 1;
 				setTimeRemaining(questions[nextIndex].timeRemaining || 10);
-				setAnswerStatus(null); 
-				setShowPopup(false); 
-				clearInterval(popupRef.current!); 
-				setPopupTimer(10); 
-				setIsAnswered(false); 
+				setAnswerStatus(null);
+				setShowPopup(false);
+				clearInterval(popupRef.current!);
+				setPopupTimer(10);
+				setIsAnswered(false);
 				return nextIndex;
 			} else {
 				setIsQuizCompleted(true);
@@ -123,7 +99,7 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 
 			const timeout = setTimeout(() => {
 				handleNextQuestion();
-			}, 10000); 
+			}, 10000);
 
 			return () => {
 				if (popupRef.current) clearInterval(popupRef.current);
