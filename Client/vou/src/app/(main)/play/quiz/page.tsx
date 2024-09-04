@@ -44,17 +44,16 @@ const mockQuestions: Question[] = [
 
 const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 	const { quiz } = searchParams;
-
 	const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 	const [timeRemaining, setTimeRemaining] = useState(
 		mockQuestions[0].timeRemaining || 10
 	);
 	const [questions, setQuestions] = useState<Question[]>(mockQuestions);
 	const [isQuizCompleted, setIsQuizCompleted] = useState(false);
-	const [answerStatus, setAnswerStatus] = useState<null | boolean>(null); // Trạng thái câu trả lời
-	const [showPopup, setShowPopup] = useState(false); // Hiển thị popup đúng sai
-	const [popupTimer, setPopupTimer] = useState(10); // Thời gian đếm ngược cho popup
-	const [isAnswered, setIsAnswered] = useState(false); // Trạng thái đã trả lời
+	const [answerStatus, setAnswerStatus] = useState<null | boolean>(null); 
+	const [showPopup, setShowPopup] = useState(false); 
+	const [popupTimer, setPopupTimer] = useState(10); 
+	const [isAnswered, setIsAnswered] = useState(false); 
 	const popupRef = useRef<NodeJS.Timeout | null>(null);
 	const stompClient = useRef<CompatClient | null>(null);
 
@@ -78,22 +77,22 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 			// Cập nhật trạng thái câu trả lời và hiển thị popup
 			setAnswerStatus(isCorrect);
 			setShowPopup(true);
-			setIsAnswered(true); // Đã trả lời, dừng thời gian
+			setIsAnswered(true);
 		},
 		[questions, currentQuestionIndex]
 	);
 
-	// Hàm chuyển câu hỏi tiếp theo
+	// Chuyển câu hỏi tiếp theo
 	const handleNextQuestion = useCallback(() => {
 		setCurrentQuestionIndex((prevIndex) => {
 			if (prevIndex < questions.length - 1) {
 				const nextIndex = prevIndex + 1;
 				setTimeRemaining(questions[nextIndex].timeRemaining || 10);
-				setAnswerStatus(null); // Reset trạng thái câu trả lời
-				setShowPopup(false); // Ẩn popup
-				clearInterval(popupRef.current!); // Clear popup timer interval
-				setPopupTimer(10); // Reset popup timer
-				setIsAnswered(false); // Reset trạng thái đã trả lời
+				setAnswerStatus(null); 
+				setShowPopup(false); 
+				clearInterval(popupRef.current!); 
+				setPopupTimer(10); 
+				setIsAnswered(false); 
 				return nextIndex;
 			} else {
 				setIsQuizCompleted(true);
@@ -111,7 +110,6 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 
 			return () => clearInterval(timer);
 		} else if (timeRemaining === 0 && !isAnswered) {
-			// Hết thời gian, mặc định chọn sai
 			handleAnswerSubmit(null);
 		}
 	}, [timeRemaining, handleAnswerSubmit, isAnswered]);
@@ -125,7 +123,7 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 
 			const timeout = setTimeout(() => {
 				handleNextQuestion();
-			}, 10000); // Sau 10 giây tự động chuyển câu hỏi
+			}, 10000); 
 
 			return () => {
 				if (popupRef.current) clearInterval(popupRef.current);
