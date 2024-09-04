@@ -16,7 +16,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 				))}
 			</ul>
 			<div className="hidden lg:block"></div>
-			<main className="p-6 pb-[calc(30px + 81px)]">{children}</main>
+			<main className="pb-[calc(30px + 81px)]">{children}</main>
 		</>
 	);
 };

@@ -140,7 +140,7 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 	} of ${totalQuestions}`;
 
 	return (
-		<>
+		<div className="p-6">
 			{/* Thông tin câu hỏi */}
 			<div className="flex flex-col items-center justify-start w-full">
 				{/* Phần thông tin phía trên câu hỏi cố định */}
@@ -211,7 +211,7 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 					{score}
 				</div>
 			</div>
-
+		</div>
 			{/* Popup hiển thị đúng/sai */}
 			{showPopup && (
 				<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
