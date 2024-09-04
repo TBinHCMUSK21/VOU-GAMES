@@ -1,4 +1,5 @@
 "use client";
+
 import React, {useEffect, useState } from 'react'
 import IconLeftArrow from '@/components/icons/IconLeftArrow'
 import PlayIcon from '@/components/icons/PlayIcon';
@@ -332,6 +333,5 @@ const Page = ({
   </>
   )
 }
-
 
 export default Page;
