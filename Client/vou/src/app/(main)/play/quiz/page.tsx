@@ -28,6 +28,7 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 	const fetchQuestions = useCallback(async () => {
 		try {
 			const response = await axios.get(`/api/quiz/${quiz}`);
+			console.log(response);
 			setQuestions(response.data);
 			setTimeRemaining(response.data[0]?.timeRemaining || 10);
 		} catch (error) {
@@ -165,10 +166,18 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 
 					{/* Đáp án */}
 					<div className="grid grid-cols-2 gap-4 w-full max-w-lg">
-						{currentQuestion?.options.map((option) => (
+						{currentQuestion?.options.map((option, index) => (
 							<button
 								key={option.id}
-								className={`${option.color} text-white font-bold py-4 rounded-lg hover:opacity-90 transition break-words h-full flex items-center justify-center min-h-[80px]`}
+								className={`text-white font-bold py-4 rounded-lg hover:opacity-90 transition h-full flex items-center justify-center min-h-[80px] ${
+									index === 0
+										? "bg-red-500"
+										: index === 1
+										? "bg-blue-500"
+										: index === 2
+										? "bg-yellow-500"
+										: "bg-green-500"
+								}`}
 								onClick={() => handleAnswerSubmit(option.id)}
 							>
 								{option.text}
