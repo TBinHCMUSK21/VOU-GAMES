@@ -5,9 +5,7 @@ export async function GET(
 	{ params }: { params: { id: string } }
 ) {
 	const quizId = params.id;
-
 	const SPRING_API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-
 	if (!SPRING_API_BASE_URL) {
 		return NextResponse.json(
 			{ error: "API URL not configured" },
@@ -16,9 +14,15 @@ export async function GET(
 	}
 
 	try {
-		const response = await fetch(`${SPRING_API_BASE_URL}/api/quiz/${quizId}`, {
-			method: "GET",
-		});
+		const response = await fetch(
+			`${SPRING_API_BASE_URL}/api/quiz/${quizId}?_=${new Date().getTime()}`,
+			{
+				headers: {
+					"Cache-Control": "no-store, max-age=0",
+				},
+				method: "GET",
+			}
+		);
 
 		if (!response.ok) {
 			return NextResponse.json(
@@ -28,7 +32,6 @@ export async function GET(
 		}
 
 		const data = await response.json();
-
 		return NextResponse.json(data);
 	} catch (error) {
 		console.error("Error fetching data from Spring Boot API:", error);
