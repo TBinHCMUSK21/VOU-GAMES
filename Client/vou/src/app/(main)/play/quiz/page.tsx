@@ -161,7 +161,6 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 				userId: userId,
 				endTime: new Date().toISOString(),
 			});
-			
 		} catch (error) {
 			console.error("Gửi kết quả thất bại:", error);
 		}
