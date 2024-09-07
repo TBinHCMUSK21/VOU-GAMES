@@ -1,36 +1,35 @@
 package com.vou.app.entity;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity
+@Table(name = "games")
 public class Games {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "type", nullable = false, length = 255)
     private String type;
+
+    @Column(name = "name", nullable = false, length = 255)
     private String name;
+
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
+
+    @Column(name = "image", length = 255)
     private String image;
+
+    @Column(name = "instructions", columnDefinition = "TEXT")
     private String instructions;
 
-    // Constructors, getters, and setters
+    @Column(name = "is_item_exchange_allowed", nullable = false)
+    private boolean isItemExchangeAllowed;
 
-    public Games() {}
-
-    public Games(String type, String name, String description, String image, String instructions) {
-        this.type = type;
-        this.name = name;
-        this.description = description;
-        this.image = image;
-        this.instructions = instructions;
-    }
-
+    // Getters and setters
     public Long getId() {
         return id;
     }
@@ -78,5 +77,12 @@ public class Games {
     public void setInstructions(String instructions) {
         this.instructions = instructions;
     }
-}
 
+    public boolean isItemExchangeAllowed() {
+        return isItemExchangeAllowed;
+    }
+
+    public void setItemExchangeAllowed(boolean isItemExchangeAllowed) {
+        this.isItemExchangeAllowed = isItemExchangeAllowed;
+    }
+}

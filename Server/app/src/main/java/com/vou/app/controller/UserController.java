@@ -3,10 +3,7 @@ package com.vou.app.controller;
 import com.vou.app.entity.User;
 import com.vou.app.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 
@@ -14,6 +11,7 @@ import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/users")
@@ -43,5 +41,16 @@ public class UserController {
         userService.saveUser(user);
 
         return ResponseEntity.status(HttpStatus.CREATED).body("User saved successfully");
+    }
+
+    @GetMapping
+    public ResponseEntity<?> getUserById(@RequestParam String userId) {
+        Optional<User> user = userService.getUserByClerkId(userId);
+
+        if (user.isPresent()) {
+            return ResponseEntity.ok(user.get());
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
     }
 }

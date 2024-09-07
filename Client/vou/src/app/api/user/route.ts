@@ -1,4 +1,4 @@
-import { WebhookEvent } from "@clerk/nextjs/server";
+import { auth, WebhookEvent } from "@clerk/nextjs/server";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { Webhook } from "svix";
@@ -83,4 +83,36 @@ export async function POST(req: Request) {
 	}
 
 	return new Response("OK", { status: 200 });
+}
+
+export async function GET(req: Request) {
+	const { userId } = auth();
+	console.log(userId);
+	if (!userId) {
+		return new Response("Unauthorized", { status: 401 });
+	}
+
+	const url = `${process.env.NEXT_PUBLIC_API_URL}/api/users?userId=${userId}`;
+
+	try {
+		const response = await fetch(url, {
+			method: "GET",
+			headers: {
+				"Content-Type": "application/json",
+			},
+		});
+
+		if (!response.ok) {
+			return new Response("Failed to fetch user data", { status: 500 });
+		}
+
+		const userData = await response.json();
+
+		return NextResponse.json({
+			message: "User data fetched successfully",
+			data: userData,
+		});
+	} catch (error) {
+		return new Response("Failed to fetch user data", { status: 500 });
+	}
 }

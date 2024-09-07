@@ -1,85 +1,87 @@
 "use client";
-
-import { useState, useEffect, useRef, useCallback } from "react";
-import { CompatClient } from "@stomp/stompjs";
+import { useState, useEffect, useCallback } from "react";
 import IconMusic from "@/components/icons/IconMusic";
 import IconTrophy from "@/components/icons/IconTrophy";
 import { Question, QuizSearchParams } from "@/types";
-
-const mockQuestions: Question[] = [
-	{
-		id: 1,
-		questionText: "Câu hỏi 1: Thủ đô của nước Anh là gì?",
-		options: [
-			{ id: 1, text: "Paris", color: "bg-red-500", isCorrect: false },
-			{ id: 2, text: "London", color: "bg-blue-500", isCorrect: true },
-			{ id: 3, text: "Berlin", color: "bg-yellow-500", isCorrect: false },
-			{ id: 4, text: "Madrid", color: "bg-green-500", isCorrect: false },
-		],
-		timeRemaining: 10,
-	},
-	{
-		id: 2,
-		questionText: "Câu hỏi 2: Thủ đô của Nhật Bản là gì?",
-		options: [
-			{ id: 1, text: "Tokyo", color: "bg-red-500", isCorrect: true },
-			{ id: 2, text: "Osaka", color: "bg-blue-500", isCorrect: false },
-			{ id: 3, text: "Kyoto", color: "bg-yellow-500", isCorrect: false },
-			{ id: 4, text: "Nagoya", color: "bg-green-500", isCorrect: false },
-		],
-		timeRemaining: 10,
-	},
-	{
-		id: 3,
-		questionText: "Câu hỏi 3: Nguyên tố nào có ký hiệu hóa học là 'O'?",
-		options: [
-			{ id: 1, text: "Oxygen", color: "bg-red-500", isCorrect: true },
-			{ id: 2, text: "Gold", color: "bg-blue-500", isCorrect: false },
-			{ id: 3, text: "Silver", color: "bg-yellow-500", isCorrect: false },
-			{ id: 4, text: "Osmium", color: "bg-green-500", isCorrect: false },
-		],
-		timeRemaining: 10,
-	},
-];
+import axios from "axios";
 
 const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
+	// Định nghĩa thời gian tối đa cho mỗi câu hỏi
+	const MAX_TIME = 5;
+
 	const { quiz } = searchParams;
 	const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-	const [timeRemaining, setTimeRemaining] = useState(
-		mockQuestions[0].timeRemaining || 10
-	);
-	const [questions, setQuestions] = useState<Question[]>(mockQuestions);
+	const [timeRemaining, setTimeRemaining] = useState(MAX_TIME);
+	const [questions, setQuestions] = useState<Question[]>([]);
 	const [isQuizCompleted, setIsQuizCompleted] = useState(false);
-	const [answerStatus, setAnswerStatus] = useState<null | boolean>(null); 
-	const [showPopup, setShowPopup] = useState(false); 
-	const [popupTimer, setPopupTimer] = useState(10); 
-	const [isAnswered, setIsAnswered] = useState(false); 
-	const popupRef = useRef<NodeJS.Timeout | null>(null);
-	const stompClient = useRef<CompatClient | null>(null);
+	const [answerStatus, setAnswerStatus] = useState<null | boolean>(null);
+	const [showPopup, setShowPopup] = useState(false);
+	const [popupTimer, setPopupTimer] = useState(5);
+	const [waitingForOthers, setWaitingForOthers] = useState(false);
+	const [isAnswered, setIsAnswered] = useState(false);
+	const [earnedPoints, setEarnedPoints] = useState(0);
 
-	// Giả lập điểm số và hạng của người dùng
-	const score = 2035;
+	const [score, setScore] = useState(0);
 	const rank = 5;
-	const username = "Lê Tuấn Bình";
+	const [username, setUsername] = useState("Loading...");
+	const [userId, setUserId] = useState(null);
 
-	// Hàm xử lý câu trả lời
+	/* Gọi API để lấy dữ liệu người dùng */
+	useEffect(() => {
+		const fetchUser = async () => {
+			try {
+				const response = await axios.get("/api/user");
+				console.log(response.data);
+
+				// Lưu userId từ API vào state
+				setUserId(response.data.data.clerkId); // Giả sử `clerkId` là `userId`
+
+				// Lưu username vào state
+				setUsername(response.data.data.name);
+			} catch (error) {
+				console.error("Error fetching user data:", error);
+				setUsername("Unknown User");
+			}
+		};
+		fetchUser();
+	}, []);
+
+	/* Gọi API để lấy dữ liệu câu hỏi */
+	const fetchQuestions = useCallback(async () => {
+		try {
+			const response = await axios.get(`/api/quiz/${quiz}`);
+			setQuestions(response.data);
+			setTimeRemaining(MAX_TIME);
+		} catch (error) {
+			console.error("Error fetching quiz questions:", error);
+		}
+	}, [quiz]);
+	useEffect(() => {
+		fetchQuestions();
+	}, [fetchQuestions]);
+
+	/* */
 	const handleAnswerSubmit = useCallback(
 		(answerId: number | null) => {
-			// Nếu hết thời gian mà chưa trả lời thì tự động coi như sai
-			let isCorrect = false;
-			if (answerId !== null) {
-				const selectedOption = questions[currentQuestionIndex].options.find(
-					(option) => option.id === answerId
+			if (!isQuizCompleted) {
+				setIsAnswered(true);
+				setWaitingForOthers(true);
+				// Tính điểm nếu người chơi trả lời đúng
+				const isCorrect = questions[currentQuestionIndex]?.options.some(
+					(option) => option.id === answerId && option.correct
 				);
-				isCorrect = selectedOption?.isCorrect || false;
+				if (isCorrect) {
+					const maxPoints = 200;
+					const pointsEarned = Math.floor(
+						(timeRemaining / MAX_TIME) * maxPoints
+					);
+					setScore((prevScore) => prevScore + pointsEarned);
+					setEarnedPoints(pointsEarned);
+				}
+				setAnswerStatus(isCorrect);
 			}
-
-			// Cập nhật trạng thái câu trả lời và hiển thị popup
-			setAnswerStatus(isCorrect);
-			setShowPopup(true);
-			setIsAnswered(true);
 		},
-		[questions, currentQuestionIndex]
+		[isQuizCompleted, questions, currentQuestionIndex, timeRemaining]
 	);
 
 	// Chuyển câu hỏi tiếp theo
@@ -87,12 +89,12 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 		setCurrentQuestionIndex((prevIndex) => {
 			if (prevIndex < questions.length - 1) {
 				const nextIndex = prevIndex + 1;
-				setTimeRemaining(questions[nextIndex].timeRemaining || 10);
-				setAnswerStatus(null); 
-				setShowPopup(false); 
-				clearInterval(popupRef.current!); 
-				setPopupTimer(10); 
-				setIsAnswered(false); 
+				setTimeRemaining(MAX_TIME);
+				setAnswerStatus(null);
+				setShowPopup(false);
+				setWaitingForOthers(false);
+				setPopupTimer(5);
+				setIsAnswered(false);
 				return nextIndex;
 			} else {
 				setIsQuizCompleted(true);
@@ -101,9 +103,9 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 		});
 	}, [questions]);
 
-	// Xử lý đếm ngược thời gian cho câu hỏi
+	// Đếm ngược thời gian cho câu hỏi
 	useEffect(() => {
-		if (timeRemaining > 0 && !isAnswered) {
+		if (timeRemaining > 0) {
 			const timer = setInterval(() => {
 				setTimeRemaining((prev) => prev - 1);
 			}, 1000);
@@ -114,23 +116,57 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 		}
 	}, [timeRemaining, handleAnswerSubmit, isAnswered]);
 
-	// Xử lý đếm ngược thời gian cho popup
+	// Xử lý đếm ngược thời gian chờ đợi
+	useEffect(() => {
+		if (waitingForOthers && timeRemaining === 0) {
+			setWaitingForOthers(false); // Đóng popup chờ khi hết thời gian
+			setShowPopup(true); // Hiển thị popup kết quả
+		}
+	}, [waitingForOthers, timeRemaining]);
+
+	// Xử lý đếm ngược thời gian cho popup kết quả (5 giây)
 	useEffect(() => {
 		if (showPopup) {
-			popupRef.current = setInterval(() => {
+			const interval = setInterval(() => {
 				setPopupTimer((prev) => prev - 1);
 			}, 1000);
 
 			const timeout = setTimeout(() => {
 				handleNextQuestion();
-			}, 10000); 
+			}, 5000);
 
 			return () => {
-				if (popupRef.current) clearInterval(popupRef.current);
+				clearInterval(interval);
 				clearTimeout(timeout);
 			};
 		}
 	}, [showPopup, handleNextQuestion]);
+
+	const handleCloseQuizCompletedPopup = async () => {
+		if (!userId) {
+			console.error("UserId không tồn tại, không thể gửi kết quả.");
+			return;
+		}
+		const quizResult = {
+			userId: userId,
+			score: score,
+			rank: rank,
+			gameId: quiz,
+		};
+		try {
+			await axios.post("/api/quiz/result", quizResult);
+
+			await axios.put(`/api/playsessions/end`, {
+				gameId: quiz,
+				userId: userId,
+				endTime: new Date().toISOString(),
+			});
+		} catch (error) {
+			console.error("Gửi kết quả thất bại:", error);
+		}
+		setShowPopup(false);
+		setIsQuizCompleted(false);
+	};
 
 	const currentQuestion = questions[currentQuestionIndex];
 	const totalQuestions = questions.length;
@@ -140,22 +176,15 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 	} of ${totalQuestions}`;
 
 	return (
-		<div className="p-6">
-			{/* Thông tin câu hỏi */}
+		<>
 			<div className="flex flex-col items-center justify-start w-full">
-				{/* Phần thông tin phía trên câu hỏi cố định */}
 				<div className="w-full max-w-lg mb-5 flex justify-between items-center fixed top-0 bg-white z-10 p-6">
-					{/* Số câu hỏi */}
 					<span className="text-lg font-bold">{currentQuestionText}</span>
-
-					{/* Phần chứa icon cúp và thời gian */}
 					<div className="flex items-center space-x-4">
-						{/* Biểu tượng cúp */}
 						<div className="flex items-center rounded-lg px-4 py-2 bg-gray-200 text-gray-700">
 							<IconTrophy className="w-5 h-5 mr-2 text-yellow-500" />
 							<span className="text-base font-semibold">#{rank}</span>
 						</div>
-						{/* Thời gian còn lại */}
 						<div className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg flex items-center">
 							<span className="text-base font-semibold">
 								{timeRemaining} seconds
@@ -164,9 +193,7 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 					</div>
 				</div>
 
-				{/* Container cuộn với thanh cuộn ẩn */}
 				<div className="w-full overflow-y-scroll max-h-[calc(100vh-260px)] mt-[60px] scrollbar-hide">
-					{/* Nội dung câu hỏi */}
 					<div className="mb-3 w-full max-w-lg flex items-center justify-center min-h-[120px]">
 						<div className="flex items-center justify-center w-full">
 							<h1 className="text-xl font-bold text-center">
@@ -175,7 +202,6 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 						</div>
 					</div>
 
-					{/* Icon phát âm thanh */}
 					<div className="relative w-full h-56 bg-gray-300 mb-10 flex items-center justify-center rounded-lg">
 						<span className="text-gray-700">Hình ảnh</span>
 						<button
@@ -187,12 +213,19 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 						</button>
 					</div>
 
-					{/* Đáp án */}
 					<div className="grid grid-cols-2 gap-4 w-full max-w-lg">
-						{currentQuestion?.options.map((option) => (
+						{currentQuestion?.options.map((option, index) => (
 							<button
 								key={option.id}
-								className={`${option.color} text-white font-bold py-4 rounded-lg hover:opacity-90 transition break-words h-full flex items-center justify-center min-h-[80px]`}
+								className={`text-white font-bold py-4 rounded-lg hover:opacity-90 transition h-[120px] flex items-center justify-center min-h-[80px] ${
+									index === 0
+										? "bg-red-500"
+										: index === 1
+										? "bg-blue-500"
+										: index === 2
+										? "bg-yellow-500"
+										: "bg-green-500"
+								}`}
 								onClick={() => handleAnswerSubmit(option.id)}
 							>
 								{option.text}
@@ -202,18 +235,27 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 				</div>
 			</div>
 
-			{/* Thông tin người dùng và điểm số cố định ở phía dưới */}
 			<div className="fixed bottom-[81px] left-0 w-full bg-white p-6 flex justify-between items-center z-50 pt-0">
-				{/* Tên người dùng */}
 				<span className="text-lg font-bold">{username}</span>
-				{/* Điểm số */}
 				<div className="bg-gray-800 text-white px-6 py-2 rounded-lg">
 					{score}
 				</div>
 			</div>
-		</div>
-			{/* Popup hiển thị đúng/sai */}
-			{showPopup && (
+
+			{/* Popup chờ đợi người chơi khác */}
+			{waitingForOthers && (
+				<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+					<div className="bg-white rounded-lg p-6 w-full max-w-sm text-center shadow-lg">
+						<h2 className="text-2xl font-bold mb-4 text-primary">
+							Đang chờ người chơi khác...
+						</h2>
+						<p className="text-gray-700">Vui lòng đợi</p>
+					</div>
+				</div>
+			)}
+
+			{/* Popup kết quả */}
+			{showPopup && !isQuizCompleted && (
 				<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
 					<div className="bg-white rounded-lg p-6 w-full max-w-sm text-center shadow-lg">
 						<h2
@@ -223,13 +265,22 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 						>
 							{answerStatus ? "🎉 Chính xác!" : "❌ Sai rồi!"}
 						</h2>
+
+						{/* Hiển thị điểm khi trả lời đúng */}
+						{answerStatus && (
+							<div className="flex justify-center items-center">
+								<div className="bg-green-100 text-green-700 text-3xl font-bold rounded-full px-6 py-2 mt-3 mb-6 border-2 border-green-600 shadow-lg">
+									+{earnedPoints} điểm
+								</div>
+							</div>
+						)}
 						<p className="text-gray-700 mb-5">
 							Câu hỏi tiếp theo sau {popupTimer} giây...
 						</p>
 						<div className="relative w-full h-4 bg-gray-300 rounded-full overflow-hidden">
 							<div
 								className="absolute h-full bg-blue-500 rounded-full"
-								style={{ width: `${(popupTimer / 10) * 100}%` }}
+								style={{ width: `${(popupTimer / 5) * 100}%` }}
 							></div>
 						</div>
 					</div>
@@ -254,9 +305,7 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 						</div>
 						<button
 							className="bg-blue-500 text-white py-2 px-6 rounded-lg text-lg font-semibold hover:bg-blue-600 transition"
-							onClick={() => {
-								setIsQuizCompleted(false);
-							}}
+							onClick={handleCloseQuizCompletedPopup}
 						>
 							Đóng
 						</button>
