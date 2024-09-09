@@ -37,7 +37,7 @@ const Page = ({
         setIsLoading(true);
   
         // Make the AJAX request to the server
-        const response = await fetch('http://localhost:8080/api/items/scroll/1', {
+        const response = await fetch('http://localhost:1116/api/items/scroll/1', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -75,7 +75,7 @@ const Page = ({
   useEffect(() => {
     const fetchGameDetails = async () => {
       try {
-        const response = await fetch('http://localhost:8080/api/games/1');
+        const response = await fetch('http://localhost:1116/api/games/1');
         if (!response.ok) {
           throw new Error('Failed to fetch game details');
         }

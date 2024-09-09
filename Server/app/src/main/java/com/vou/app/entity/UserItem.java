@@ -2,11 +2,8 @@ package com.vou.app.entity;
 
 import jakarta.persistence.*;
 
-import java.io.Serializable;
-import java.util.Objects;
-
 @Entity
-@Table(name = "UserItem")
+@Table(name = "UserItems")
 public class UserItem {
     @EmbeddedId
     private UserItemsId id;
@@ -14,11 +11,24 @@ public class UserItem {
     @Column(nullable = false)
     private int quantity;
 
-    // Constructors
+    @ManyToOne
+    @MapsId("itemsID") // Ensures that the embedded ID maps correctly
+    @JoinColumn(name = "itemsID") // Removed insertable and updatable constraints
+    private Items items;
+
+    // Default Constructor
     public UserItem() {}
 
+    // Constructor for creating UserItem with UserItemsId and quantity
     public UserItem(UserItemsId id, int quantity) {
         this.id = id;
+        this.quantity = quantity;
+    }
+
+    // Constructor for creating UserItem with userID, itemId, and quantity
+    public UserItem(Long userID, Long itemId, int quantity, Items items) {
+        this.id = new UserItemsId(itemId, userID);
+        this.items = items;
         this.quantity = quantity;
     }
 
@@ -38,5 +48,12 @@ public class UserItem {
     public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
-}
 
+    public Items getItems() {
+        return items;
+    }
+
+    public void setItems(Items items) {
+        this.items = items;
+    }
+}

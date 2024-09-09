@@ -1,8 +1,11 @@
 package com.vou.app.entity;
 
-
 import jakarta.persistence.*;
+import lombok.*;
 
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @Entity
 @Table(name = "games")
 public class Games {
@@ -26,10 +29,9 @@ public class Games {
     @Column(name = "instructions", columnDefinition = "TEXT")
     private String instructions;
 
-    @Column(name = "is_item_exchange_allowed", nullable = false)
+    @Column(name = "isItemExchangeAllowed", nullable = false)
     private boolean isItemExchangeAllowed;
 
-    // Getters and setters
     public Long getId() {
         return id;
     }

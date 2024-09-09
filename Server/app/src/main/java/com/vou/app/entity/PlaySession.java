@@ -1,8 +1,16 @@
 package com.vou.app.entity;
 
+
 import jakarta.persistence.*;
+import lombok.*;
+
 import java.time.LocalDateTime;
 
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @Entity
 @Table(name = "playsessions")
 public class PlaySession {
@@ -11,57 +19,17 @@ public class PlaySession {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "playerid", nullable = false)
-    private String playerId;
+    @ManyToOne
+    @JoinColumn(name = "playerid", nullable = false)
+    private User player;
 
-    // Đổi tên biến thành eventGameId để khớp với cột eventgameid trong cơ sở dữ liệu
-    @Column(name = "eventgameid", nullable = false)
-    private Long eventGameId;
+    @ManyToOne
+    @JoinColumn(name = "eventgameid", nullable = false)
+    private EventGames eventGames;
 
-    @Column(name = "start_time", nullable = false)
+    @Column(name = "startTime", nullable = false)
     private LocalDateTime startTime = LocalDateTime.now();
 
-    @Column(name = "end_time")
+    @Column(name = "endTime")
     private LocalDateTime endTime;
-
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getPlayerId() {
-        return playerId;
-    }
-
-    public void setPlayerId(String playerId) {
-        this.playerId = playerId;
-    }
-
-    public Long getEventGameId() {
-        return eventGameId;
-    }
-
-    public void setEventGameId(Long eventGameId) {
-        this.eventGameId = eventGameId;
-    }
-
-    public LocalDateTime getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(LocalDateTime startTime) {
-        this.startTime = startTime;
-    }
-
-    public LocalDateTime getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(LocalDateTime endTime) {
-        this.endTime = endTime;
-    }
 }

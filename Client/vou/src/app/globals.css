@@ -11,3 +11,7 @@
 	-ms-overflow-style: none;
 	scrollbar-width: none;
 }
+
+.ul {
+	margin-bottom: 0px !important;
+}

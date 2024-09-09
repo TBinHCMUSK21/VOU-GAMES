@@ -1,0 +1,71 @@
+.eventCard {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    padding: 16px;
+    background-color: #fff;
+    text-align: start;
+    max-width: 210px;
+}
+
+.eventCard:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.eventImage {
+    border-bottom: 1px solid #ddd;
+    object-fit: cover;
+    border-radius: 4px;
+    width: 200px !important;
+    height: 100px !important;
+}
+
+.eventCard h3 {
+    font-size: 1.2rem;
+    margin: 16px 0 8px;
+}
+
+.eventCard p {
+    font-style: italic;
+}
+
+.heartButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: #000000;
+    transition: color 0.3s ease;
+}
+
+.heartButton:focus {
+    outline: none;
+}
+
+.heartButton.liked {
+    color: red;
+}
+
+.timeLeft {
+    font-size: 12px;
+    color: gray;
+}
+
+.timeBar {
+    margin-top: 8px;
+    background-color: #f3f3f3;
+    border-radius: 4px;
+    height: 8px;
+    width: 100%;
+    overflow: hidden;
+}
+
+.timeProgress {
+    background-color: #007bff;
+    height: 100%;
+    transition: width 0.5s;
+}
