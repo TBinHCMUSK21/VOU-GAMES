@@ -4,6 +4,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrophy, faArrowLeft, faPlay } from '@fortawesome/free-solid-svg-icons';
 import {useRouter} from "next/navigation";
+import PlaySessionsService from '../../../../api/playsessions/route';
+import ShakeUserService from '../../../../api/shakeuser/route';
 
 const Page = () => {
     const [eventgameId, setEventGameId] = useState(-1);
@@ -25,10 +27,25 @@ const Page = () => {
         window.history.back();
     };
 
-    const handlePlayGame = () => {
+    const handlePlayGame = async () => {
+        const requestBodyAddPlaySessions = {
+            eventgameid: eventgameId,
+            playerid: 1,
+        }
+
+        await PlaySessionsService.addPlaySessions(requestBodyAddPlaySessions);
+
         if (name == "Quiz Game") {
             router.push(`/play/quiz?eventgameId=${eventgameId}&quiz=1`);
         } else if (name == "Shake Game") {
+            const requestBodyAddShakeUser = {
+                eventgameid: eventgameId,
+                playerid: 1,
+                quantity: 10
+            }
+
+            await ShakeUserService.addShakeUser(requestBodyAddShakeUser);
+
             router.push(`/play/shakegame?eventgameId=${eventgameId}`);
         }
 

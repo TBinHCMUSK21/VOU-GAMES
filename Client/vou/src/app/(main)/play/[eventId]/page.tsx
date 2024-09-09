@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'next/navigation'; // useParams to get eventId from URL
-import GameCard from './GameCard'; // Adjust this import path as needed
+import { useParams } from 'next/navigation';
+import GameCard from './GameCard';
 import EventGamesService from '../../../api/eventgames/route';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Spinner } from 'react-bootstrap';
