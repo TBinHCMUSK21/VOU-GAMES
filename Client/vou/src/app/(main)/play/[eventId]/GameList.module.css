@@ -1,0 +1,10 @@
+.gamePage {
+    padding: 20px;
+}
+
+.gameList {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: left;
+    gap: 16px;
+}
