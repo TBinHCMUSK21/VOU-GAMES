@@ -5,9 +5,9 @@ import axios from "axios";
 export async function PUT(request: Request) {
 	try {
 		const body = await request.json();
-		const { eventGameId, userId, endTime } = body;
+		const { eventgameId, userId, endTime } = body;
 
-		if (!eventGameId || !userId || !endTime) {
+		if (!eventgameId || !userId || !endTime) {
 			return NextResponse.json(
 				{
 					message:
@@ -19,8 +19,8 @@ export async function PUT(request: Request) {
 
 		const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-		const response = await axios.put(`${apiUrl}/api/playsessions/end`, {
-			eventGameId,
+		const response = await axios.put(`${apiUrl}/api/v1/playsessions/end`, {
+			eventgameId,
 			userId,
 			endTime,
 		});

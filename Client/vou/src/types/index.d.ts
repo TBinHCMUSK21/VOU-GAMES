@@ -10,7 +10,6 @@ export type TActiveLinkProps = {
 	children: React.ReactNode;
 };
 export type QuizSearchParams = {
-	quiz: string;
 	eventgameId: string;
 };
 

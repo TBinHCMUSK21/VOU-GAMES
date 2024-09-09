@@ -9,7 +9,6 @@ import PageNotFound from "@/app/not-found";
 const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 	const MAX_TIME = 5;
 
-	const { quiz } = searchParams;
 	const { eventgameId } = searchParams;
 
 	const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -34,7 +33,7 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 			try {
 				const response = await axios.get("/api/user");
 
-				setUserId(response.data.data.clerkId);
+				setUserId(response.data.data.id);
 
 				setUsername(response.data.data.name);
 			} catch (error) {
@@ -47,13 +46,13 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 	/* Gọi API để lấy dữ liệu câu hỏi */
 	const fetchQuestions = useCallback(async () => {
 		try {
-			const response = await axios.get(`/api/quiz/${quiz}`);
+			const response = await axios.get(`/api/quiz/${eventgameId}`);
 			setQuestions(response.data);
 			setTimeRemaining(MAX_TIME);
 		} catch (error) {
 			console.error("Error fetching quiz questions:", error);
 		}
-	}, [quiz]);
+	}, [eventgameId]);
 	useEffect(() => {
 		fetchQuestions();
 	}, [fetchQuestions]);
@@ -154,7 +153,7 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 			await axios.post("/api/quiz/result", quizResult);
 
 			await axios.put(`/api/playsessions/end`, {
-				eventGameId: eventgameId,
+				eventgameId: eventgameId,
 				userId: userId,
 				endTime: new Date().toISOString(),
 			});
