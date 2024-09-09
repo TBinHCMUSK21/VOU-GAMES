@@ -19,7 +19,7 @@ export type Option = {
 	id: number;
 	text: string;
 	color: string;
-	isCorrect: boolean;
+	correct: boolean;
 };
 
 export type Question = {

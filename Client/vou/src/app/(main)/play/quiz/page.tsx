@@ -24,12 +24,19 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 	const [score, setScore] = useState(0);
 	const rank = 5;
 	const [username, setUsername] = useState("Loading...");
+	const [userId, setUserId] = useState(null);
 
 	/* Gọi API để lấy dữ liệu người dùng */
 	useEffect(() => {
 		const fetchUser = async () => {
 			try {
 				const response = await axios.get("/api/user");
+				console.log(response.data);
+
+				// Lưu userId từ API vào state
+				setUserId(response.data.data.clerkId); // Giả sử `clerkId` là `userId`
+
+				// Lưu username vào state
 				setUsername(response.data.data.name);
 			} catch (error) {
 				console.error("Error fetching user data:", error);
@@ -53,6 +60,7 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 		fetchQuestions();
 	}, [fetchQuestions]);
 
+	/* */
 	const handleAnswerSubmit = useCallback(
 		(answerId: number | null) => {
 			if (!isQuizCompleted) {
@@ -134,7 +142,28 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 		}
 	}, [showPopup, handleNextQuestion]);
 
-	const handleCloseQuizCompletedPopup = () => {
+	const handleCloseQuizCompletedPopup = async () => {
+		if (!userId) {
+			console.error("UserId không tồn tại, không thể gửi kết quả.");
+			return;
+		}
+		const quizResult = {
+			userId: userId,
+			score: score,
+			rank: rank,
+			gameId: quiz,
+		};
+		try {
+			await axios.post("/api/quiz/result", quizResult);
+
+			await axios.put(`/api/playsessions/end`, {
+				gameId: quiz,
+				userId: userId,
+				endTime: new Date().toISOString(),
+			});
+		} catch (error) {
+			console.error("Gửi kết quả thất bại:", error);
+		}
 		setShowPopup(false);
 		setIsQuizCompleted(false);
 	};
@@ -192,10 +221,10 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 									index === 0
 										? "bg-red-500"
 										: index === 1
-											? "bg-blue-500"
-											: index === 2
-												? "bg-yellow-500"
-												: "bg-green-500"
+										? "bg-blue-500"
+										: index === 2
+										? "bg-yellow-500"
+										: "bg-green-500"
 								}`}
 								onClick={() => handleAnswerSubmit(option.id)}
 							>

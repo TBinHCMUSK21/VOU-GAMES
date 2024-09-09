@@ -1,5 +1,6 @@
 package com.vou.app.entity;
 
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,10 +12,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "PlaySessions")
-public class PlaySessions {
+@Table(name = "playsessions")
+public class PlaySession {
+
     @Id
-    @GeneratedValue(strategy =  GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
@@ -22,11 +24,11 @@ public class PlaySessions {
     private User player;
 
     @ManyToOne
-    @JoinColumn(name = "eventgameid", nullable = false)
+    @Column(name = "eventgameid", nullable = false)
     private EventGames eventGames;
 
-    @Column(name = "startTime")
-    private LocalDateTime startTime;
+    @Column(name = "startTime", nullable = false)
+    private LocalDateTime startTime = LocalDateTime.now();
 
     @Column(name = "endTime")
     private LocalDateTime endTime;
