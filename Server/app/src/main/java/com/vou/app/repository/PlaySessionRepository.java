@@ -10,6 +10,8 @@ import java.util.Optional;
 
 @Repository
 public interface PlaySessionRepository extends JpaRepository<PlaySession, Long> {
+
     @Query("SELECT ps FROM PlaySession ps WHERE ps.eventGames.id = :eventgameid AND ps.player.id = :playerid")
     Optional<PlaySession> findByEventGameIdAndPlayerId(@Param("eventgameid") Long eventgameid, @Param("playerid") Long playerid);
+
 }

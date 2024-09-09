@@ -10,7 +10,6 @@ public class QuizResult {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Sửa tên từ gameId thành eventGameId để phản ánh đúng tên cột trong bảng
     @Column(name = "eventgameid", nullable = false)
     private Long eventGameId;
 
@@ -20,7 +19,6 @@ public class QuizResult {
     @Column(name = "score", nullable = false)
     private int score;
 
-    // Backticks vì 'rank' là từ khóa của SQL
     @Column(name = "`rank`", nullable = false)
     private int rank;
 

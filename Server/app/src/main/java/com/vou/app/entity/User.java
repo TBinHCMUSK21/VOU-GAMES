@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-increment strategy
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, updatable = false)
     private Long id;
 
@@ -49,6 +49,9 @@ public class User {
 
     @Column(name = "username", length = 45)
     private String username;
+
+    @Column(name = "status", nullable = false)
+    private String status;
 
     public User() {
     }
@@ -83,6 +86,7 @@ public class User {
     public String getRole() {
         return role;
     }
+
 
     public void setRole(String role) {
         this.role = role;

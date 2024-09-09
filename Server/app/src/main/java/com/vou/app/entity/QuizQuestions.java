@@ -23,6 +23,17 @@ public class QuizQuestions {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @Column(name = "file", nullable = false)
+    private String file;
+
+    public String getFile() {
+        return file;
+    }
+
+    public void setFile(String file) {
+        this.file = file;
+    }
+
     // Getters and Setters
     public Long getId() {
         return id;
