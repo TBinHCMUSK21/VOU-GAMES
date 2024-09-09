@@ -24,7 +24,7 @@ public class PlaySession {
     private User player;
 
     @ManyToOne
-    @Column(name = "eventgameid", nullable = false)
+    @JoinColumn(name = "eventgameid", nullable = false)
     private EventGames eventGames;
 
     @Column(name = "startTime", nullable = false)
