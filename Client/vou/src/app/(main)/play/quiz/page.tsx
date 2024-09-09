@@ -4,12 +4,14 @@ import IconMusic from "@/components/icons/IconMusic";
 import IconTrophy from "@/components/icons/IconTrophy";
 import { Question, QuizSearchParams } from "@/types";
 import axios from "axios";
+import PageNotFound from "@/app/not-found";
 
 const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
-	// Định nghĩa thời gian tối đa cho mỗi câu hỏi
 	const MAX_TIME = 5;
 
 	const { quiz } = searchParams;
+	const { eventgameId } = searchParams;
+
 	const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 	const [timeRemaining, setTimeRemaining] = useState(MAX_TIME);
 	const [questions, setQuestions] = useState<Question[]>([]);
@@ -31,16 +33,12 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 		const fetchUser = async () => {
 			try {
 				const response = await axios.get("/api/user");
-				console.log(response.data);
 
-				// Lưu userId từ API vào state
-				setUserId(response.data.data.clerkId); // Giả sử `clerkId` là `userId`
+				setUserId(response.data.data.clerkId);
 
-				// Lưu username vào state
 				setUsername(response.data.data.name);
 			} catch (error) {
-				console.error("Error fetching user data:", error);
-				setUsername("Unknown User");
+				return <PageNotFound />;
 			}
 		};
 		fetchUser();
@@ -66,7 +64,6 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 			if (!isQuizCompleted) {
 				setIsAnswered(true);
 				setWaitingForOthers(true);
-				// Tính điểm nếu người chơi trả lời đúng
 				const isCorrect = questions[currentQuestionIndex]?.options.some(
 					(option) => option.id === answerId && option.correct
 				);
@@ -151,13 +148,13 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 			userId: userId,
 			score: score,
 			rank: rank,
-			gameId: quiz,
+			eventGameId: eventgameId,
 		};
 		try {
 			await axios.post("/api/quiz/result", quizResult);
 
 			await axios.put(`/api/playsessions/end`, {
-				gameId: quiz,
+				eventGameId: eventgameId,
 				userId: userId,
 				endTime: new Date().toISOString(),
 			});

@@ -5,11 +5,14 @@ import axios from "axios";
 export async function PUT(request: Request) {
 	try {
 		const body = await request.json();
-		const { gameId, userId, endTime } = body;
+		const { eventGameId, userId, endTime } = body;
 
-		if (!gameId || !userId || !endTime) {
+		if (!eventGameId || !userId || !endTime) {
 			return NextResponse.json(
-				{ message: "Thiếu thông tin cần thiết (gameId, userId, hoặc endTime)" },
+				{
+					message:
+						"Thiếu thông tin cần thiết (eventGameId, userId, hoặc endTime)",
+				},
 				{ status: 400 }
 			);
 		}
@@ -17,7 +20,7 @@ export async function PUT(request: Request) {
 		const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 		const response = await axios.put(`${apiUrl}/api/playsessions/end`, {
-			gameId,
+			eventGameId,
 			userId,
 			endTime,
 		});

@@ -11,8 +11,7 @@ export type TActiveLinkProps = {
 };
 export type QuizSearchParams = {
 	quiz: string;
-	brand: string;
-	event: string;
+	eventgameId: string;
 };
 
 export type Option = {
