@@ -27,4 +27,5 @@ public class ItemService {
     public List<Items> getItemByEventId(Long eventId) {
         return itemsRepository.findByEventId(eventId);
     }
+
 }

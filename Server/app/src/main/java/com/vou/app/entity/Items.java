@@ -1,13 +1,9 @@
 package com.vou.app.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 
 @Entity
+@Table(name = "Items")
 public class Items {
 
     @Id
@@ -15,8 +11,8 @@ public class Items {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "eventid", insertable = false, updatable = false)
-    private Events event; // Assuming you have an Event entity
+    @JoinColumn(name = "eventid") // The column in the Items table
+    private Events event; // This will reference the Events entity
 
     private String name;
     private String image;
@@ -63,4 +59,5 @@ public class Items {
         this.image = image;
     }
 }
+
 
