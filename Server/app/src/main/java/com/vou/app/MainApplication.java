@@ -1,5 +1,6 @@
 package com.vou.app;
 
+import org.apache.catalina.Manager;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -9,3 +10,4 @@ public class MainApplication {
 		SpringApplication.run(MainApplication.class, args);
 	}
 }
+

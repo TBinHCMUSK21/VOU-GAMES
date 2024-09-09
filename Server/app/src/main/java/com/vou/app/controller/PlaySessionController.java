@@ -1,6 +1,5 @@
 package com.vou.app.controller;
 
-
 import com.vou.app.dto.PlaySessionUpdateRequest;
 import com.vou.app.service.PlaySessionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +15,7 @@ public class PlaySessionController {
 
     @PutMapping("/end")
     public ResponseEntity<String> updateEndTime(@RequestBody PlaySessionUpdateRequest request) {
-        boolean isUpdated = playSessionService.updateEndTime(request.getGameId(), request.getUserId(), request.getEndTime());
+        boolean isUpdated = playSessionService.updateEndTime(request.getEventGameId(), request.getUserId(), request.getEndTime());
         if (isUpdated) {
             return ResponseEntity.ok("Thời gian kết thúc đã được cập nhật.");
         } else {

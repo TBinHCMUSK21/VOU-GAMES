@@ -8,5 +8,6 @@ import java.util.Optional;
 
 @Repository
 public interface PlaySessionRepository extends JpaRepository<PlaySession, Long> {
-    Optional<PlaySession> findByGameIdAndPlayerId(Long gameId, String playerId);
+
+    Optional<PlaySession> findByEventGameIdAndPlayerId(Long eventGameId, String playerId);
 }

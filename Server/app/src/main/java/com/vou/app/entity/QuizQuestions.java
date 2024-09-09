@@ -11,20 +11,19 @@ public class QuizQuestions {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "game_id", nullable = false)
-    private Long gameId;
+    @Column(name = "eventgameid")
+    private Long eventGameId;
 
-    @Column(name = "title", nullable = false, length = 255)
+    @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(name = "description", columnDefinition = "TEXT")
+    @Column(name = "description")
     private String description;
 
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    // Getters and setters
-
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -33,12 +32,12 @@ public class QuizQuestions {
         this.id = id;
     }
 
-    public Long getGameId() {
-        return gameId;
+    public Long getEventGameId() {
+        return eventGameId;
     }
 
-    public void setGameId(Long gameId) {
-        this.gameId = gameId;
+    public void setEventGameId(Long eventGameId) {
+        this.eventGameId = eventGameId;
     }
 
     public String getTitle() {

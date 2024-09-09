@@ -27,9 +27,9 @@ public class QuizController {
     @Autowired
     private QuizService quizService;
 
-    @GetMapping("/{gameID}")
-    public ResponseEntity<List<QuestionResponse>> getQuiz(@PathVariable Long gameID) {
-        List<QuestionResponse> questions = quizService.getQuizQuestions(gameID);
+    @GetMapping("/{eventGameID}")
+    public ResponseEntity<List<QuestionResponse>> getQuiz(@PathVariable Long eventGameID) {
+        List<QuestionResponse> questions = quizService.getQuizQuestions(eventGameID);
         if (questions == null || questions.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }

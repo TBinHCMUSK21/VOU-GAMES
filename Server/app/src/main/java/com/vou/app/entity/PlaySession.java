@@ -1,6 +1,5 @@
 package com.vou.app.entity;
 
-
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -15,16 +14,16 @@ public class PlaySession {
     @Column(name = "playerid", nullable = false)
     private String playerId;
 
-    @Column(name = "gameid", nullable = false)
-    private Long gameId;
+    // Đổi tên biến thành eventGameId để khớp với cột eventgameid trong cơ sở dữ liệu
+    @Column(name = "eventgameid", nullable = false)
+    private Long eventGameId;
 
-    @Column(name = "startTime", nullable = false)
+    @Column(name = "start_time", nullable = false)
     private LocalDateTime startTime = LocalDateTime.now();
 
-    @Column(name = "endTime")
+    @Column(name = "end_time")
     private LocalDateTime endTime;
 
-    // Getters và Setters
 
     public Long getId() {
         return id;
@@ -42,12 +41,12 @@ public class PlaySession {
         this.playerId = playerId;
     }
 
-    public Long getGameId() {
-        return gameId;
+    public Long getEventGameId() {
+        return eventGameId;
     }
 
-    public void setGameId(Long gameId) {
-        this.gameId = gameId;
+    public void setEventGameId(Long eventGameId) {
+        this.eventGameId = eventGameId;
     }
 
     public LocalDateTime getStartTime() {

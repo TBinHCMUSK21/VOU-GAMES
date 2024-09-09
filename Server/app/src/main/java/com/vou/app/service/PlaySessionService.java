@@ -1,6 +1,5 @@
 package com.vou.app.service;
 
-
 import com.vou.app.entity.PlaySession;
 import com.vou.app.repository.PlaySessionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +15,8 @@ public class PlaySessionService {
     @Autowired
     private PlaySessionRepository playSessionRepository;
 
-    public boolean updateEndTime(Long gameId, String userId, String endTimeStr) {
-        Optional<PlaySession> playSessionOpt = playSessionRepository.findByGameIdAndPlayerId(gameId, userId);
+    public boolean updateEndTime(Long eventGameId, String userId, String endTimeStr) {
+        Optional<PlaySession> playSessionOpt = playSessionRepository.findByEventGameIdAndPlayerId(eventGameId, userId);
         if (playSessionOpt.isPresent()) {
             PlaySession playSession = playSessionOpt.get();
 

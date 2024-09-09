@@ -1,17 +1,18 @@
 package com.vou.app.dto;
 
-
 public class PlaySessionUpdateRequest {
-    private Long gameId;
+
+    private Long eventGameId;
     private String userId;
     private String endTime;
 
-    public Long getGameId() {
-        return gameId;
+
+    public Long getEventGameId() {
+        return eventGameId;
     }
 
-    public void setGameId(Long gameId) {
-        this.gameId = gameId;
+    public void setEventGameId(Long eventGameId) {
+        this.eventGameId = eventGameId;
     }
 
     public String getUserId() {
