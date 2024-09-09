@@ -9,19 +9,17 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "eventgames")
-public class EventGames {
+@Table(name = "notifications")
+public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
+    @JoinColumn(name = "playerId", nullable = false)
+    private User player;
+
+    @ManyToOne
     @JoinColumn(name = "eventid", nullable = false)
     private Events event;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "gameid", nullable = false)
-    private Games game;
 }
-
-

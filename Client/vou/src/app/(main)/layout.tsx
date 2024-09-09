@@ -4,7 +4,7 @@ import { menuItems } from "@/constants";
 const Layout = ({ children }: { children: React.ReactNode }) => {
 	return (
 		<>
-			<ul className="flex p-2 bg-white border-t border-gray-200 lg:hidden fixed bottom-0 left-0 w-full justify-center gap-0 h-30 z-50">
+			<ul className="flex p-2 bg-white border-t border-gray-200 lg:hidden fixed bottom-0 left-0 w-full justify-center gap-0 h-30 z-50 mb-0">
 				{menuItems.map((item, index) => (
 					<MenuItem
 						className="flex-1 text-center"
