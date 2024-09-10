@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/shakeuser")
+@RequestMapping("/api/games/shakeuser")
 @RequiredArgsConstructor
 public class ShakeUserController {
     private final ShakeUserService shakeUserService;

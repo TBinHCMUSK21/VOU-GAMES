@@ -1,13 +1,24 @@
 import { NextResponse } from "next/server";
+interface Token {
+	accessToken: string;
+}
 
 export async function POST() {
+	const tokenString = sessionStorage.getItem('token');
+	if (!tokenString) {
+		throw new Error('Token not found');
+	}
+	const token: Token = JSON.parse(tokenString);
+	const accessToken = token.accessToken;
+
 	try {
 		const response = await fetch(
-			`${process.env.NEXT_PUBLIC_API_URL}/api/my-api`,
+			`${process.env.NEXT_PUBLIC_API_URL}/api/games/my-api`,
 			{
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
+					'Authorization': `Bearer ${accessToken}`
 				},
 				body: JSON.stringify({ message: "Hello" }),
 			}

@@ -3,6 +3,7 @@ package com.vou.app.controller;
 import com.vou.app.entity.User;
 import com.vou.app.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
@@ -14,7 +15,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/games/users")
 public class UserController {
 
     @Autowired
@@ -46,6 +47,18 @@ public class UserController {
     @GetMapping
     public ResponseEntity<?> getUserById(@RequestParam String userId) {
         Optional<User> user = userService.getUserByClerkId(userId);
+
+        if (user.isPresent()) {
+            return ResponseEntity.ok(user.get());
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+    }
+
+    @GetMapping("/info")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
+    public ResponseEntity<?> getUserByUsername(@RequestParam String username) {
+        Optional<User> user = userService.getUserByUsername(username);
 
         if (user.isPresent()) {
             return ResponseEntity.ok(user.get());

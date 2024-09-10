@@ -36,7 +36,7 @@ const Page = () => {
         await PlaySessionsService.addPlaySessions(requestBodyAddPlaySessions);
 
         if (name == "Quiz Game") {
-            router.push(`/play/quiz?eventgameId=${eventgameId}&quiz=1`);
+            router.push(`/play/quiz?eventgameId=${eventgameId}`);
         } else if (name == "Shake Game") {
             const requestBodyAddShakeUser = {
                 eventgameid: eventgameId,
