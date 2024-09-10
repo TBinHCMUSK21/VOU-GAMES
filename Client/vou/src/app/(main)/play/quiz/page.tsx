@@ -9,8 +9,6 @@ import PageNotFound from "@/app/not-found";
 const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 	const MAX_TIME = 5;
 
-	const { eventgameId } = searchParams;
-
 	const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 	const [timeRemaining, setTimeRemaining] = useState(MAX_TIME);
 	const [questions, setQuestions] = useState<Question[]>([]);
@@ -21,23 +19,25 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 	const [waitingForOthers, setWaitingForOthers] = useState(false);
 	const [isAnswered, setIsAnswered] = useState(false);
 	const [earnedPoints, setEarnedPoints] = useState(0);
-
 	const [score, setScore] = useState(0);
 	const rank = 5;
 	const [username, setUsername] = useState("Loading...");
 	const [userId, setUserId] = useState(null);
+	const [loading, setLoading] = useState(true); // To track loading state
+	const [hasError, setHasError] = useState(false); // To track error state
+
+	const { eventgameId } = searchParams;
 
 	/* Gọi API để lấy dữ liệu người dùng */
 	useEffect(() => {
 		const fetchUser = async () => {
 			try {
 				const response = await axios.get("/api/user");
-
 				setUserId(response.data.data.id);
-
 				setUsername(response.data.data.name);
 			} catch (error) {
-				return <PageNotFound />;
+				setHasError(true); // Set error state on failure
+				console.error("Error fetching user data:", error);
 			}
 		};
 		fetchUser();
@@ -47,17 +47,28 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 	const fetchQuestions = useCallback(async () => {
 		try {
 			const response = await axios.get(`/api/quiz/${eventgameId}`);
-			setQuestions(response.data);
-			setTimeRemaining(MAX_TIME);
+			if (response.status !== 200 || !response.data.length) {
+				setHasError(true); // Set error if no questions are found
+			} else {
+				setQuestions(response.data);
+				setTimeRemaining(MAX_TIME);
+				setLoading(false); // Set loading to false when done
+			}
 		} catch (error) {
+			setHasError(true); // Set error state if the request fails
 			console.error("Error fetching quiz questions:", error);
 		}
 	}, [eventgameId]);
-	useEffect(() => {
-		fetchQuestions();
-	}, [fetchQuestions]);
 
-	/* */
+	useEffect(() => {
+		if (eventgameId) {
+			fetchQuestions();
+		} else {
+			setHasError(true); // Handle missing eventgameId
+		}
+	}, [fetchQuestions, eventgameId]);
+
+	/* Handle Answer Submission */
 	const handleAnswerSubmit = useCallback(
 		(answerId: number | null) => {
 			if (!isQuizCompleted) {
@@ -80,7 +91,7 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 		[isQuizCompleted, questions, currentQuestionIndex, timeRemaining]
 	);
 
-	// Chuyển câu hỏi tiếp theo
+	/* Chuyển câu hỏi tiếp theo */
 	const handleNextQuestion = useCallback(() => {
 		setCurrentQuestionIndex((prevIndex) => {
 			if (prevIndex < questions.length - 1) {
@@ -99,7 +110,7 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 		});
 	}, [questions]);
 
-	// Đếm ngược thời gian cho câu hỏi
+	/* Đếm ngược thời gian cho câu hỏi */
 	useEffect(() => {
 		if (timeRemaining > 0) {
 			const timer = setInterval(() => {
@@ -112,7 +123,7 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 		}
 	}, [timeRemaining, handleAnswerSubmit, isAnswered]);
 
-	// Xử lý đếm ngược thời gian chờ đợi
+	/* Xử lý đếm ngược thời gian chờ đợi */
 	useEffect(() => {
 		if (waitingForOthers && timeRemaining === 0) {
 			setWaitingForOthers(false); // Đóng popup chờ khi hết thời gian
@@ -120,7 +131,7 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 		}
 	}, [waitingForOthers, timeRemaining]);
 
-	// Xử lý đếm ngược thời gian cho popup kết quả (5 giây)
+	/* Xử lý đếm ngược thời gian cho popup kết quả (5 giây) */
 	useEffect(() => {
 		if (showPopup) {
 			const interval = setInterval(() => {
@@ -164,13 +175,21 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 		setIsQuizCompleted(false);
 	};
 
+	// Conditionally render based on loading and error states
+	if (loading) {
+		return <PageNotFound />;
+	}
+
+	if (hasError) {
+		return <PageNotFound />;
+	}
+
 	const currentQuestion = questions[currentQuestionIndex];
 	const totalQuestions = questions.length;
 
 	const currentQuestionText = `${
 		currentQuestionIndex + 1
 	} of ${totalQuestions}`;
-
 	return (
 		<>
 			<div className="flex flex-col items-center justify-start w-full">
