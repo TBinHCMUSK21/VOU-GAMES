@@ -67,6 +67,7 @@ public class User {
         this.phoneNumber = phoneNumber;
         this.role = role;
         this.username = username;
+        this.status="ACTIVE";
     }
 
     public Long getId() {
