@@ -1,13 +1,14 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
-import IconMusic from "@/components/icons/IconMusic";
-import IconTrophy from "@/components/icons/IconTrophy";
-import { Question, QuizSearchParams } from "@/types";
 import axios from "axios";
 import PageNotFound from "@/app/not-found";
+import { Question, QuizSearchParams } from "@/types";
+import IconTrophy from "@/components/icons/IconTrophy";
+import IconMusic from "@/components/icons/IconMusic";
 
 const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 	const MAX_TIME = 5;
+	const { eventgameId } = searchParams;
 
 	const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 	const [timeRemaining, setTimeRemaining] = useState(MAX_TIME);
@@ -20,13 +21,14 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 	const [isAnswered, setIsAnswered] = useState(false);
 	const [earnedPoints, setEarnedPoints] = useState(0);
 	const [score, setScore] = useState(0);
-	const rank = 5;
+	const [rank] = useState(5);
 	const [username, setUsername] = useState("Loading...");
-	const [userId, setUserId] = useState(null);
-	const [loading, setLoading] = useState(true); // To track loading state
-	const [hasError, setHasError] = useState(false); // To track error state
-
-	const { eventgameId } = searchParams;
+	const [userId, setUserId] = useState<number | null>(null);
+	const [loading, setLoading] = useState(true);
+	const [hasError, setHasError] = useState(false);
+	const [eventStartTime, setEventStartTime] = useState<string | null>(null);
+	const [startTimeMessage, setStartTimeMessage] = useState<string | null>(null);
+	const [hasEventStarted, setHasEventStarted] = useState(false);
 
 	/* Gọi API để lấy dữ liệu người dùng */
 	useEffect(() => {
@@ -36,37 +38,71 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 				setUserId(response.data.data.id);
 				setUsername(response.data.data.name);
 			} catch (error) {
-				setHasError(true); // Set error state on failure
+				setHasError(true);
 				console.error("Error fetching user data:", error);
 			}
 		};
 		fetchUser();
 	}, []);
 
-	/* Gọi API để lấy dữ liệu câu hỏi */
+	/* Gọi API để kiểm tra sự kiện và lấy dữ liệu câu hỏi */
 	const fetchQuestions = useCallback(async () => {
 		try {
 			const response = await axios.get(`/api/quiz/${eventgameId}`);
+			console.log(response.data.length);
 			if (response.status !== 200 || !response.data.length) {
-				setHasError(true); // Set error if no questions are found
+				setHasError(true);
 			} else {
 				setQuestions(response.data);
 				setTimeRemaining(MAX_TIME);
-				setLoading(false); // Set loading to false when done
+				setLoading(false);
+				setHasEventStarted(true);
 			}
 		} catch (error) {
-			setHasError(true); // Set error state if the request fails
+			setHasError(true);
 			console.error("Error fetching quiz questions:", error);
 		}
 	}, [eventgameId]);
 
+	const fetchEventStartTime = useCallback(async () => {
+		setLoading(true);
+		try {
+			const response = await axios.get(`/api/event/start-time/${eventgameId}`);
+
+			if (response.data?.message) {
+				setStartTimeMessage(response.data.message);
+			} else if (response.data?.startTime) {
+				setEventStartTime(response.data.startTime);
+				const startTime = new Date(response.data.startTime).getTime();
+				const now = new Date().getTime();
+				const timeUntilStart = startTime - now;
+				if (timeUntilStart > 0) {
+					const timer = setTimeout(async () => {
+						await fetchQuestions();
+					}, timeUntilStart);
+
+					return () => clearTimeout(timer);
+				} else {
+					await fetchQuestions();
+				}
+			} else {
+				throw new Error("Unexpected response format from server.");
+			}
+		} catch (error) {
+			setHasError(true);
+			console.error("Error fetching event start time:", error);
+		} finally {
+			setLoading(false);
+		}
+	}, [eventgameId, fetchQuestions]);
+
 	useEffect(() => {
 		if (eventgameId) {
-			fetchQuestions();
+			fetchEventStartTime();
 		} else {
-			setHasError(true); // Handle missing eventgameId
+			setHasError(true);
 		}
-	}, [fetchQuestions, eventgameId]);
+	}, [fetchEventStartTime, eventgameId]);
 
 	/* Handle Answer Submission */
 	const handleAnswerSubmit = useCallback(
@@ -126,8 +162,8 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 	/* Xử lý đếm ngược thời gian chờ đợi */
 	useEffect(() => {
 		if (waitingForOthers && timeRemaining === 0) {
-			setWaitingForOthers(false); // Đóng popup chờ khi hết thời gian
-			setShowPopup(true); // Hiển thị popup kết quả
+			setWaitingForOthers(false);
+			setShowPopup(true);
 		}
 	}, [waitingForOthers, timeRemaining]);
 
@@ -175,13 +211,33 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 		setIsQuizCompleted(false);
 	};
 
-	// Conditionally render based on loading and error states
 	if (loading) {
-		return <PageNotFound />;
+		return <>Loading...</>;
 	}
 
 	if (hasError) {
 		return <PageNotFound />;
+	}
+
+	if (startTimeMessage) {
+		return (
+			<div className="flex flex-col items-center justify-center scrollbar-hide text-center overflow-y-scroll h-[calc(100vh-100px)] scrollbar-hide ">
+				<div className=" min-h-[120px] rounded-lg">
+					<h1 className="text-3xl font-bold text-primary mb-4">
+						Sự kiện chưa bắt đầu
+					</h1>
+					<p className="text-gray-700 text-lg">{startTimeMessage}</p>
+				</div>
+			</div>
+		);
+	}
+
+	if (!hasEventStarted) {
+		return (
+			<div className="flex flex-col items-center justify-center h-screen bg-gray-100 text-center">
+				<h1 className="text-3xl font-bold">Vui lòng đợi sự kiện bắt đầu...</h1>
+			</div>
+		);
 	}
 
 	const currentQuestion = questions[currentQuestionIndex];
