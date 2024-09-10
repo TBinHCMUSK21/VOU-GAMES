@@ -5,6 +5,10 @@ import IconTrophy from "@/components/icons/IconTrophy";
 import { Question, QuizSearchParams } from "@/types";
 import axios from "axios";
 
+interface Token {
+	accessToken: string;
+}
+
 const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 	// Định nghĩa thời gian tối đa cho mỗi câu hỏi
 	const MAX_TIME = 5;
@@ -29,8 +33,20 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 	/* Gọi API để lấy dữ liệu người dùng */
 	useEffect(() => {
 		const fetchUser = async () => {
+			const tokenString = sessionStorage.getItem('token');
+			if (!tokenString) {
+				throw new Error('Token not found');
+			}
+			const token: Token = JSON.parse(tokenString);
+			const accessToken = token.accessToken;
+
 			try {
-				const response = await axios.get("/api/user");
+				const response = await axios.get("http://localhost:1110/api/games/user", {
+					headers: {
+						'Authorization': `Bearer ${accessToken}`
+					},
+					withCredentials: true
+				});
 				console.log(response.data);
 
 				// Lưu userId từ API vào state
@@ -48,8 +64,20 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 
 	/* Gọi API để lấy dữ liệu câu hỏi */
 	const fetchQuestions = useCallback(async () => {
+		const tokenString = sessionStorage.getItem('token');
+		if (!tokenString) {
+			throw new Error('Token not found');
+		}
+		const token: Token = JSON.parse(tokenString);
+		const accessToken = token.accessToken;
+
 		try {
-			const response = await axios.get(`/api/quiz/${quiz}`);
+			const response = await axios.get(`http://localhost:1110/api/games/quiz/${quiz}`, {
+				headers: {
+					'Authorization': `Bearer ${accessToken}`
+				},
+				withCredentials: true
+			});
 			setQuestions(response.data);
 			setTimeRemaining(MAX_TIME);
 		} catch (error) {
@@ -154,12 +182,29 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 			gameId: quiz,
 		};
 		try {
-			await axios.post("/api/quiz/result", quizResult);
+			const tokenString = sessionStorage.getItem('token');
+			if (!tokenString) {
+				throw new Error('Token not found');
+			}
+			const token: Token = JSON.parse(tokenString);
+			const accessToken = token.accessToken;
 
-			await axios.put(`/api/playsessions/end`, {
+			await axios.post("http://localhost:1110/api/games/quiz/result", quizResult, {
+				headers: {
+					'Authorization': `Bearer ${accessToken}`
+				},
+				withCredentials: true
+			});
+
+			await axios.put(`http://localhost:1110/api/games/playsessions/end`, {
 				gameId: quiz,
 				userId: userId,
 				endTime: new Date().toISOString(),
+			},{
+				headers: {
+					'Authorization': `Bearer ${accessToken}`
+				},
+				withCredentials: true
 			});
 		} catch (error) {
 			console.error("Gửi kết quả thất bại:", error);

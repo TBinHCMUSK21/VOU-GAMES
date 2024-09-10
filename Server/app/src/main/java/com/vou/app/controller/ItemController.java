@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.Random;
 
 @RestController
-@RequestMapping("/api/items")
+@RequestMapping("/api/games/items")
 public class ItemController {
     @Autowired
     private ItemService itemService;

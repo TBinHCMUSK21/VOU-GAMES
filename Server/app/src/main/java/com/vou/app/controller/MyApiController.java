@@ -10,7 +10,7 @@ import org.springframework.http.HttpStatus;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/games")
 public class MyApiController {
 
     @PostMapping("/my-api")

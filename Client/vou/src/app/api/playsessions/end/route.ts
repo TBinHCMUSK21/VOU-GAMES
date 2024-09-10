@@ -1,11 +1,20 @@
 import { NextResponse } from "next/server";
 import axios from "axios";
+interface Token {
+	accessToken: string;
+}
 
-// Hàm xử lý yêu cầu PUT tới /api/playsessions/end
+// Hàm xử lý yêu cầu PUT tới /api/games/playsessions/end
 export async function PUT(request: Request) {
 	try {
 		const body = await request.json();
 		const { gameId, userId, endTime } = body;
+		const tokenString = sessionStorage.getItem('token');
+		if (!tokenString) {
+			throw new Error('Token not found');
+		}
+		const token: Token = JSON.parse(tokenString);
+		const accessToken = token.accessToken;
 
 		if (!gameId || !userId || !endTime) {
 			return NextResponse.json(
@@ -16,10 +25,15 @@ export async function PUT(request: Request) {
 
 		const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-		const response = await axios.put(`${apiUrl}/api/playsessions/end`, {
+		const response = await axios.put(`${apiUrl}/api/games/playsessions/end`, {
 			gameId,
 			userId,
 			endTime,
+		}, {
+			headers: {
+				'Authorization': `Bearer ${accessToken}`
+			},
+			withCredentials: true
 		});
 
 		return NextResponse.json(

@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
+interface Token {
+	accessToken: string;
+}
+
 export async function GET(
 	request: NextRequest,
 	{ params }: { params: { id: string } }
@@ -13,12 +17,20 @@ export async function GET(
 		);
 	}
 
+	const tokenString = sessionStorage.getItem('token');
+	if (!tokenString) {
+		throw new Error('Token not found');
+	}
+	const token: Token = JSON.parse(tokenString);
+	const accessToken = token.accessToken;
+
 	try {
 		const response = await fetch(
-			`${SPRING_API_BASE_URL}/api/quiz/${quizId}?_=${new Date().getTime()}`,
+			`${SPRING_API_BASE_URL}/api/games/quiz/${quizId}?_=${new Date().getTime()}`,
 			{
 				headers: {
 					"Cache-Control": "no-store, max-age=0",
+					'Authorization': `Bearer ${accessToken}`
 				},
 				method: "GET",
 			}
