@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/user-items")
+@RequestMapping("/api/games/user-items")
 public class UserItemController {
     @Autowired
     private UserItemService userItemService;

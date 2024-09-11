@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/playsessions")
+@RequestMapping("/api/games/playsessions")
 @RequiredArgsConstructor
 public class PlaySessionController {
     private final PlaySessionService playSessionService;

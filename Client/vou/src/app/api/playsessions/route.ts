@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 
-const PLAYSESSION_API_BASE_URL = "http://localhost:1116/api/v1/playsessions";
+const PLAYSESSION_API_BASE_URL = "http://localhost:1110/api/games/playsessions";
 
 interface Token {
     accessToken: string;
@@ -12,7 +12,19 @@ interface PlaySessions {
 
 class PlaySessionsService {
     addPlaySessions(requestBody: { eventgameid: number; playerid: number }): Promise<axios.AxiosResponse<any>> {
-        return axios.post(`${PLAYSESSION_API_BASE_URL}`, requestBody);
+        const tokenString = sessionStorage.getItem('token');
+        if (!tokenString) {
+            throw new Error('Token not found');
+        }
+        const token: Token = JSON.parse(tokenString);
+        const accessToken = token.accessToken;
+
+        return axios.post(`${PLAYSESSION_API_BASE_URL}`, requestBody, {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            },
+            withCredentials: true
+        });
     }
 
 }

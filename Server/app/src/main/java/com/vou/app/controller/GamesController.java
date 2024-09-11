@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/games")
+@RequestMapping("/api/games/games")
 public class GamesController {
     // get info about games
     @Autowired

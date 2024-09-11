@@ -4,6 +4,7 @@ import Image from 'next/image';
 import styles from './EventCard.module.css';
 import { SuitHeart, SuitHeartFill } from 'react-bootstrap-icons';
 import NotificationService from '../../api/notification/route';
+import {number} from "prop-types";
 
 interface Event {
     id: number;
@@ -30,7 +31,7 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
     const handleHeartClick = async (e: React.MouseEvent) => {
         e.stopPropagation();
 
-        const requestBody = { eventId: event[0].id, playerId: 1 };
+        const requestBody = { eventId: event[0].id, playerId: parseInt(sessionStorage.getItem("userId"))};
 
         if (!liked) {
             const response = await NotificationService.addNotification(requestBody);
@@ -60,7 +61,7 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
                     </button>
                     <div>{event[0].name}</div>
                 </div>
-                <div className="mt-1" style={{fontSize: "14.5px"}}>
+                <div className="mt-1" style={{fontSize: "16px"}}>
                     {new Date(event[0].startTime).toLocaleDateString('vi-VN', {
                     year: 'numeric',
                     month: '2-digit',

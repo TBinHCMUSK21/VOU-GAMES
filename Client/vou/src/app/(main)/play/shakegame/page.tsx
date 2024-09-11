@@ -48,13 +48,16 @@ interface PlaySessionUpdateRequest {
   userId: number;
   endTime: string; // Adjust the type as needed, e.g., Date
 }
+
+interface Token {
+  accessToken: string;
+}
+
 const Page = ({
 	searchParams,
 }: {
 	searchParams: {
 		eventgameId: string;
-		brand: string;
-		event: string;
 	};
 }) => {
 	const { eventgameId } = searchParams;
@@ -81,7 +84,7 @@ const Page = ({
         const response = await axios.get("/api/user");
         const fetchedUserId = Number(response.data.data.id);
         setUserId(fetchedUserId);  // Set the userId
-  
+
         // After setting the userId, fetch shake user details
         fetchShakeUserDetails(fetchedUserId);  // Pass the userId here
         fetchFriends(fetchedUserId);
@@ -89,11 +92,11 @@ const Page = ({
         console.error("Error fetching user data:", error);
       }
     };
-  
+
     const fetchEventDetails = async () => {
       try {
         const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/eventgames/get-event/${eventgameId}`);
-        const data = response.data; 
+        const data = response.data;
         console.log('data event', data);
         setGame(data);
       } catch (error) {
@@ -104,13 +107,13 @@ const Page = ({
         }
       }
     };
-  
+
     // Move shakeUserDetails inside fetchUser and pass userId as argument
     const fetchShakeUserDetails = async (fetchedUserId: number) => {
       if (!fetchedUserId) return;
       try {
         const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/shakeuser/get-shake-user/${fetchedUserId}/${eventgameId}`);
-        const data = response.data; 
+        const data = response.data;
         console.log('data shake user', data);
         setNumberClick(data.quantity);
       } catch (error) {
@@ -130,12 +133,12 @@ const Page = ({
         console.error('Error fetching friends:', error);
       }
     };
-  
+
     // Execute fetchUser and fetchEventDetails
     fetchUser();
     fetchEventDetails();
   }, [eventgameId]); // Add dependencies if necessary
-  
+
 
   const handleShakeClick = async () => {
     console.log('handleShakeClick',userId);
@@ -143,6 +146,22 @@ const Page = ({
       try {
         // Show loading spinner or indicator
         setIsLoading(true);
+
+        const tokenString = sessionStorage.getItem('token');
+        if (!tokenString) {
+          throw new Error('Token not found');
+        }
+        const token: Token = JSON.parse(tokenString);
+        const accessToken = token.accessToken;
+
+        // Make the AJAX request to the server
+        const response = await fetch('http://localhost:1110/api/games/items/scroll/1', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
+          },
+          body: JSON.stringify({}), // Add any necessary body content here
         // Make the AJAX request to the server with Axios
         const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/items/scroll/eventGameId/${eventgameId}/userId/${userId}`, {
           // Add any necessary data to be sent in the request body here
@@ -159,12 +178,12 @@ const Page = ({
         // Update state with the fetched data
         setItem(data);
         setIsModalOpen(true);
-        setNumberClick(prev => prev - 1);  
+        setNumberClick(prev => prev - 1);
         //update play session end time
         const requestPayload: PlaySessionUpdateRequest = {
           eventgameId: Number(eventgameId),
           userId: userId,
-          endTime: new Date().toISOString(), 
+          endTime: new Date().toISOString(),
         };
         updateEndTime(requestPayload);
       } catch (error) {
@@ -193,6 +212,38 @@ const Page = ({
       }
     }
   };
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  useEffect(() => {
+    const fetchGameDetails = async () => {
+      const tokenString = sessionStorage.getItem('token');
+      if (!tokenString) {
+        throw new Error('Token not found');
+      }
+      const token: Token = JSON.parse(tokenString);
+      const accessToken = token.accessToken;
+
+      try {
+        const response = await fetch('http://localhost:1110/api/games/games/1', {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`
+          },
+        });
+        if (!response.ok) {
+          throw new Error('Failed to fetch game details');
+        }
+        const data: Game = await response.json(); // Type the data
+        setGame(data);
+      } catch (error) {
+        if (error instanceof Error) {
+          setError(error.message);
+        } else {
+          setError('An unknown error occurred');
+        }
+      }
+    };
 
   const handleInventoryClick = async () => {
     try{
@@ -250,7 +301,7 @@ const Page = ({
     }
     console.log('setGiftRequest',friendId,userItemId);
   }
-  
+
 
   const closeModal = () => {
     setIsModalOpen(false);
@@ -515,6 +566,5 @@ const Page = ({
   </>
   )
 }
-
 
 export default Page;
