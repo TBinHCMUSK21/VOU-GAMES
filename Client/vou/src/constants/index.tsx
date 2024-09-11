@@ -24,7 +24,7 @@ export const menuItems: TMenuItem[] = [
 	},
 	{
 		url: "/history",
-		title: "Lịch sử",
+		title: "Bạn bè",
 		icon: <IconHistory className="size-5" />,
 	},
 	{

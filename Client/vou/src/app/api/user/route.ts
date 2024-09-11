@@ -47,8 +47,9 @@ export async function POST(req: Request) {
 			phone_numbers,
 			last_name,
 			first_name,
-			password
 		} = msg.data;
+
+		console.log("msg data: ", id);
 
 		const url = `${process.env.NEXT_PUBLIC_API_URL}/api/games/users`;
 
@@ -59,10 +60,24 @@ export async function POST(req: Request) {
 		const phoneNumber = phone_numbers?.[0]?.phone_number ?? "";
 		const createdAt = new Date().toISOString();
 
+		const requestBody = {
+			email: email,
+			username: username ?? generateRandomString(50),
+			password: generateRandomString(50),
+			phoneNumber: phoneNumber,
+			role: "USER",
+			status: "ACTIVE"
+		}
+
+		const responseAccount = await axios.post(`http://localhost:1110/api/v1/authentication/accounts/register`, requestBody);
+		console.log("responseAccount", responseAccount);
+
+
 		const response = await fetch(url, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
+
 			},
 			body: JSON.stringify({
 				clerkId: id,
@@ -81,18 +96,6 @@ export async function POST(req: Request) {
 		if (!response.ok) {
 			return new Response("Failed to save user data", { status: 500 });
 		}
-
-		const requestBody = {
-			email: email,
-			username: username ?? generateRandomString(50),
-			password: password ?? generateRandomString(50),
-			phoneNumber: phoneNumber,
-			role: "USER",
-			status: "ACTIVE"
-		}
-
-		const responseAccount = await axios.post(`http://localhost:1110/api/v1/authentication/accounts/register`, requestBody);
-		console.log("responseAccount", responseAccount);
 
 		return NextResponse.json({
 			message: "User created and data saved successfully",

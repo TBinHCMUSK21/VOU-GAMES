@@ -5,6 +5,7 @@ import java.util.List;
 public class QuestionResponse {
     private int id;
     private String questionText;
+    private String file;
     private List<OptionResponse> options;
     private int timeRemaining;
 
@@ -38,5 +39,13 @@ public class QuestionResponse {
 
     public void setTimeRemaining(int timeRemaining) {
         this.timeRemaining = timeRemaining;
+    }
+
+    public String getFile() {
+        return file;
+    }
+
+    public void setFile(String file) {
+        this.file = file;
     }
 }

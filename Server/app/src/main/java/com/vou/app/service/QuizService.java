@@ -40,6 +40,7 @@ public class QuizService {
             QuestionResponse questionResponse = new QuestionResponse();
             questionResponse.setId(Math.toIntExact(quizQuestion.getId()));
             questionResponse.setQuestionText(quizQuestion.getTitle());
+            questionResponse.setFile(quizQuestion.getFile());
             questionResponse.setTimeRemaining(10);
 
             List<OptionResponse> options = new ArrayList<>();

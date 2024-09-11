@@ -5,6 +5,12 @@ import PageNotFound from "@/app/not-found";
 import { Question, QuizSearchParams } from "@/types";
 import IconTrophy from "@/components/icons/IconTrophy";
 import IconMusic from "@/components/icons/IconMusic";
+import {useUser} from "@clerk/nextjs";
+interface PlaySessionUpdateRequest {
+	eventgameId: number;
+	userId: number;
+	endTime: string; // Adjust the type as needed, e.g., Date
+}
 
 interface Token {
 	accessToken: string;
@@ -12,6 +18,8 @@ interface Token {
 
 const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 	const MAX_TIME = 5;
+	const {user}= useUser();
+
 	const { eventgameId } = searchParams;
 
 	const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -27,47 +35,27 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 	const [score, setScore] = useState(0);
 	const [rank] = useState(5);
 	const [username, setUsername] = useState("Loading...");
+
 	const [userId, setUserId] = useState<number | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [hasError, setHasError] = useState(false);
 	const [eventStartTime, setEventStartTime] = useState<string | null>(null);
 	const [startTimeMessage, setStartTimeMessage] = useState<string | null>(null);
 	const [hasEventStarted, setHasEventStarted] = useState(false);
+	const [audio, setAudio] = useState(null);
+	const [isPlaying, setIsPlaying] = useState(false);
 
+	const fetchUser = useCallback(async () => {
+		console.log("user: ", user);
+
+		const userId = sessionStorage.getItem('userId');
+		setUserId(parseInt(userId));
+		setUsername(user.username);
+	}, [user]);
 	/* Gọi API để lấy dữ liệu người dùng */
 	useEffect(() => {
-		const fetchUser = async () => {
-			const tokenString = sessionStorage.getItem("token");
-			if (!tokenString) {
-				throw new Error("Token not found");
-			}
-			const token: Token = JSON.parse(tokenString);
-			const accessToken = token.accessToken;
-
-			try {
-				const response = await axios.get(
-					"http://localhost:1110/api/games/user",
-					{
-						headers: {
-							Authorization: `Bearer ${accessToken}`,
-						},
-						withCredentials: true,
-					}
-				);
-				console.log(response.data);
-
-				// Lưu userId từ API vào state
-				setUserId(response.data.data.clerkId); // Giả sử `clerkId` là `userId`
-
-				// Lưu username vào state
-				setUsername(response.data.data.name);
-			} catch (error) {
-				setHasError(true);
-				console.error("Error fetching user data:", error);
-			}
-		};
 		fetchUser();
-	}, []);
+	}, [fetchUser]);
 
 	/* Gọi API để kiểm tra sự kiện và lấy dữ liệu câu hỏi */
 	const fetchQuestions = useCallback(async () => {
@@ -99,7 +87,19 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 	const fetchEventStartTime = useCallback(async () => {
 		setLoading(true);
 		try {
-			const response = await axios.get(`/api/event/start-time/${eventgameId}`);
+			const tokenString = sessionStorage.getItem('token');
+			if (!tokenString) {
+				throw new Error('Token not found');
+			}
+			const token: Token = JSON.parse(tokenString);
+			const accessToken = token.accessToken;
+
+			const response = await axios.get(`http://localhost:1110/api/games/events/start-time/${eventgameId}`, {
+				headers: {
+					'Authorization': `Bearer ${accessToken}`
+				},
+				withCredentials: true
+			});
 
 			if (response.data?.message) {
 				setStartTimeMessage(response.data.message);
@@ -161,6 +161,10 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 
 	/* Chuyển câu hỏi tiếp theo */
 	const handleNextQuestion = useCallback(() => {
+		if (audio) {
+			audio.pause(); // Dừng âm thanh hiện tại
+		}
+
 		setCurrentQuestionIndex((prevIndex) => {
 			if (prevIndex < questions.length - 1) {
 				const nextIndex = prevIndex + 1;
@@ -170,13 +174,14 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 				setWaitingForOthers(false);
 				setPopupTimer(5);
 				setIsAnswered(false);
+
 				return nextIndex;
 			} else {
 				setIsQuizCompleted(true);
 				return prevIndex;
 			}
 		});
-	}, [questions]);
+	}, [audio, questions]);
 
 	/* Đếm ngược thời gian cho câu hỏi */
 	useEffect(() => {
@@ -217,6 +222,38 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 		}
 	}, [showPopup, handleNextQuestion]);
 
+	useEffect(() => {
+		if (questions.length > 0 && currentQuestionIndex < questions.length) {
+			const currentQuestion = questions[currentQuestionIndex];
+
+			// Nếu câu hỏi có file âm thanh
+			if (currentQuestion.file) {
+				// Tạo đối tượng âm thanh
+				const audioFile = new Audio(currentQuestion.file);
+
+				// Phát âm thanh khi chuyển câu hỏi mới
+				audioFile.play().catch((error) => {
+					console.error("Lỗi phát âm thanh:", error);
+				});
+
+				// Cleanup: dừng âm thanh khi câu hỏi thay đổi hoặc component unmount
+				return () => {
+					audioFile.pause();
+					audioFile.currentTime = 0; // Đặt lại thời gian phát về 0
+				};
+			}
+		}
+	}, [currentQuestionIndex, questions]);
+
+
+	useEffect(() => {
+		if (audio) {
+			audio.pause();
+			audio.currentTime = 0; // Đặt lại thời gian bắt đầu của audio
+		}
+	}, [currentQuestionIndex, audio]);
+
+
 	const handleCloseQuizCompletedPopup = async () => {
 		if (!userId) {
 			console.error("UserId không tồn tại, không thể gửi kết quả.");
@@ -247,18 +284,20 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 				}
 			);
 
-			await axios.put(
-				`http://localhost:1110/api/games/playsessions/end`,
-				{
-					gameId: eventgameId,
-					userId: userId,
-					endTime: new Date().toISOString(),
-				},
+			const requestPayload: PlaySessionUpdateRequest = {
+				eventgameId: Number(eventgameId),
+				userId: userId,
+				endTime: new Date().toISOString(),
+			};
+
+			const response = await axios.put(
+				`http://localhost:1110/api/games/playsessions/end`, // Adjust the URL as needed
+				requestPayload,
 				{
 					headers: {
-						Authorization: `Bearer ${accessToken}`,
+						'Content-Type': 'application/json',
+						'Authorization': `Bearer ${accessToken}`,
 					},
-					withCredentials: true,
 				}
 			);
 		} catch (error) {
@@ -289,13 +328,13 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 		);
 	}
 
-	if (!hasEventStarted) {
-		return (
-			<div className="flex flex-col items-center justify-center h-screen bg-gray-100 text-center">
-				<h1 className="text-3xl font-bold">Vui lòng đợi sự kiện bắt đầu...</h1>
-			</div>
-		);
-	}
+	// if (!hasEventStarted) {
+	// 	return (
+	// 		<div className="flex flex-col items-center justify-center h-screen bg-gray-100 text-center">
+	// 			<h1 className="text-3xl font-bold">Vui lòng đợi sự kiện bắt đầu...</h1>
+	// 		</div>
+	// 	);
+	// }
 
 	const currentQuestion = questions[currentQuestionIndex];
 	const totalQuestions = questions.length;

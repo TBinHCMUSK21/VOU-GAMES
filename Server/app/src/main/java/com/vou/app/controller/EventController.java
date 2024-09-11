@@ -2,6 +2,7 @@ package com.vou.app.controller;
 
 import com.vou.app.entity.Events;
 import com.vou.app.service.EventService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,8 +12,9 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
 
+@Slf4j
 @RestController
-@RequestMapping("/api/events")
+@RequestMapping("/api/games/events")
 public class EventController {
 
     @Autowired
@@ -20,6 +22,7 @@ public class EventController {
 
     @GetMapping("/start-time/{eventgameId}")
     public ResponseEntity<?> getEventStartTime(@PathVariable Long eventgameId) {
+        log.info("EventController | getEventStartTime");
         Optional<Events> eventOptional = eventService.getEventStartTimeByEventGameId(eventgameId);
 
         if (eventOptional.isPresent()) {
