@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/eventgames")
+@RequestMapping("/api/games/eventgames")
 public class EventGamesController {
     @Autowired
     private EventGamesService eventGamesService;

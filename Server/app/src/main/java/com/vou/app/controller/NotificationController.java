@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/notifications")
+@RequestMapping("/api/games/notifications")
 @RequiredArgsConstructor
 @Validated
 public class NotificationController {

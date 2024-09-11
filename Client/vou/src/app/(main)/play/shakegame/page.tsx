@@ -12,6 +12,11 @@ interface Game {
   instructions: string;
   // Add other properties as needed
 }
+
+interface Token {
+  accessToken: string;
+}
+
 const Page = ({
 	searchParams,
 }: {
@@ -35,12 +40,20 @@ const Page = ({
       try {
         // Show loading spinner or indicator
         setIsLoading(true);
-  
+
+        const tokenString = sessionStorage.getItem('token');
+        if (!tokenString) {
+          throw new Error('Token not found');
+        }
+        const token: Token = JSON.parse(tokenString);
+        const accessToken = token.accessToken;
+
         // Make the AJAX request to the server
-        const response = await fetch('http://localhost:1116/api/items/scroll/1', {
+        const response = await fetch('http://localhost:1110/api/games/items/scroll/1', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
           },
           body: JSON.stringify({}), // Add any necessary body content here
         });
@@ -74,8 +87,19 @@ const Page = ({
 
   useEffect(() => {
     const fetchGameDetails = async () => {
+      const tokenString = sessionStorage.getItem('token');
+      if (!tokenString) {
+        throw new Error('Token not found');
+      }
+      const token: Token = JSON.parse(tokenString);
+      const accessToken = token.accessToken;
+
       try {
-        const response = await fetch('http://localhost:1116/api/games/1');
+        const response = await fetch('http://localhost:1110/api/games/games/1', {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`
+          },
+        });
         if (!response.ok) {
           throw new Error('Failed to fetch game details');
         }

@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import axios from "axios";
 
+interface Token {
+	accessToken: string;
+}
+
 export async function POST(request: Request) {
 	try {
 		const body = await request.json();
@@ -16,11 +20,27 @@ export async function POST(request: Request) {
 			);
 		}
 
-		const response = await axios.post(`${apiUrl}/api/quiz/result`, {
+		const tokenString = sessionStorage.getItem('token');
+		if (!tokenString) {
+			throw new Error('Token not found');
+		}
+		const token: Token = JSON.parse(tokenString);
+		const accessToken = token.accessToken;
+
+		const response = await axios.post(`${apiUrl}/api/games/quiz/result`, {
 			userId,
 			score,
 			rank,
+<<<<<<< HEAD
 			eventGameId,
+=======
+			gameId,
+		}, {
+			headers: {
+				'Authorization': `Bearer ${accessToken}`
+			},
+			withCredentials: true
+>>>>>>> main
 		});
 
 		return NextResponse.json(
