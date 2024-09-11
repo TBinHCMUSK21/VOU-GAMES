@@ -75,6 +75,15 @@ public class PlayTurnRequestController {
         return ResponseEntity.ok("Response recorded");
     }
 
+    // increase play turns when share is clicked
+    @PostMapping("/share")
+    public ResponseEntity<String> sharePlayTurn(
+            @RequestParam Long userId,
+            @RequestParam Long eventGameId) {
+        shakeUserService.adjustQuantity(userId, eventGameId, 1);
+        return ResponseEntity.ok("Play turns increased");
+    }
+
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<PlayTurnRequest>> getRequestsForUser(@PathVariable Long userId) {
         List<PlayTurnRequest> requests = playTurnRequestService.findByUserId(userId);
