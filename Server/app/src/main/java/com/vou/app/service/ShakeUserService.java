@@ -22,6 +22,10 @@ public class ShakeUserService {
     private UserRepository userRepository;
 
     public ShakeUser createShakeUser(final ShakeUserRequest shakeUserRequest) {
+        ShakeUser findShakeUser = shakeUserRepository.findByPlayerIdAndEventGamesId(shakeUserRequest.getPlayerid(), shakeUserRequest.getEventgameid()).orElse(null);
+        if (findShakeUser != null) {
+            return findShakeUser;
+        }
         Optional<EventGames> eventGames = eventGamesRepository.findById(shakeUserRequest.getEventgameid());
         Optional<User> user = userRepository.findById(shakeUserRequest.getPlayerid());
 

@@ -50,6 +50,27 @@ interface PlaySessionUpdateRequest {
   endTime: string; // Adjust the type as needed, e.g., Date
 }
 
+interface EventDetails {
+  id: number;
+  name: string;
+  image: string;
+  voucherCount: number;
+  // Add other event fields if needed
+}
+
+interface Voucher {
+  code: string;
+  count: number;
+  description: string;
+  event: EventDetails;
+  expirationDate: string; // Consider using Date if you prefer
+  id: number;
+  image: string;
+  qrcode: string;
+  status: string;
+  value: number;
+}
+
 interface Token {
   accessToken: string;
 }
@@ -76,13 +97,18 @@ const Page = ({
   const [friends, setFriends] = useState<Friend[]>([]);
   const [selectedFriendId, setSelectedFriendId] = useState<number | null>(null);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
-
+  const [isCombineButtonEnabled, setIsCombineButtonEnabled] = useState(false);
+  const [isVoucherModalOpen, setIsVoucherModalOpen] = useState(false);
+  const [voucher, setVoucher] = useState<Voucher | null>(null);
   const [items, setItems] = useState([]);
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const fetchedUserId = sessionStorage.getItem('userId');
+        if (!fetchedUserId) {
+          throw new Error('User ID not found');
+        }
         // After setting the userId, fetch shake user details
         fetchShakeUserDetails(parseInt(fetchedUserId));  // Pass the userId here
         fetchFriends(parseInt(fetchedUserId));
@@ -273,6 +299,8 @@ const Page = ({
       const data = response.data;
       setItems(data);
       setIsItemModalOpen(true);
+      const isButtonEnabled = canCombineItems(data, game.targetWord);
+      setIsCombineButtonEnabled(isButtonEnabled);
     }
     catch (error) {
       console.error('Fetch error:', error);
@@ -343,6 +371,55 @@ const Page = ({
     setIsTradeModalOpen(false);
     setIsPlayTurnModalOpen(false);
   };
+
+  const canCombineItems = (items: { items: { name: string }; quantity: number }[], targetWord: string) => {
+    // Create a map of the available letters and their quantities
+    console.log('items',items);
+    console.log('targetWord',targetWord);
+    const availableLetters: { [key: string]: number } = {};
+  
+    items.forEach((item) => {
+      const letter = item.items.name;
+      availableLetters[letter] = (availableLetters[letter] || 0) + item.quantity;
+    });
+  
+    // Check if the targetWord can be formed using the available letters
+    for (const char of targetWord) {
+      if (!availableLetters[char] || availableLetters[char] <= 0) {
+        return false;
+      }
+      availableLetters[char]--;
+    }
+    return true;
+  };
+
+  const handleCombineItems = async () => {
+    try {
+      const tokenString = sessionStorage.getItem('token');
+      if (!tokenString) {
+        throw new Error('Token not found');
+      }
+      const token: Token = JSON.parse(tokenString);
+      const accessToken = token.accessToken;
+
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/games/vouchers/event/${game?.id}/random?userId=${userId}&eventgameId=${eventgameId}`, {
+        headers:{
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        }
+      });
+      console.log(response);
+      // set items from data
+      const data = response.data;
+      setVoucher(data);
+      setIsVoucherModalOpen(true);
+      setIsItemModalOpen(false);
+    }
+    catch (error) {
+      console.error('Fetch error:', error);
+      alert('Failed to fetch item. Please try again later.');
+    }
+  }
 
   const handleToggleInstructions = () => {
     console.log('toggle instructions');
@@ -444,7 +521,7 @@ const Page = ({
           <CustomButtonShake label="Kho đồ" onClick={handleInventoryClick} />
           <CustomButtonShake label="Tìm thêm lượt chơi" onClick={handlePlayTurnClick}/>
           <CustomButtonShake label="Tặng vật phẩm cho bạn bè" onClick={handleTradeClick}/>
-          <CustomButtonShake label="Đổi quà" />
+          {/* <CustomButtonShake label="Đổi quà" /> */}
         </div>
 
         {/* Roll modal */}
@@ -502,6 +579,14 @@ const Page = ({
               <div className='mb-5'>
                 <p>Keyword cần hoàn thiện: {game.targetWord}</p>
               </div>
+              {/* Combine Button */}
+              <button
+                onClick={handleCombineItems}  // Replace with the function that combines items
+                className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ${!isCombineButtonEnabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                disabled={!isCombineButtonEnabled}
+              >
+                Đổi voucher
+              </button>
             </div>
           </div>
         )}
@@ -590,7 +675,43 @@ const Page = ({
             eventGameId={Number(eventgameId) ?? 0}
             isOpen={isPlayTurnModalOpen}
             onClose={() => setIsPlayTurnModalOpen(false)}
+            onNumberClickChange={() => setNumberClick(numberClick + 1)}
           />
+        )}
+
+        {/* voucher modal */}
+        {isVoucherModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+            <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+              {/* Close Button */}
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">Voucher Details</h2>
+                <button
+                  className="text-gray-600 hover:text-gray-900"
+                  onClick={() => setIsVoucherModalOpen(false)}
+                >
+                  ✕
+                </button>
+              </div>
+  
+              {/* Voucher Details */}
+              <div className="space-y-4">
+                <div className="text-sm">
+                  <strong>Code:</strong> {voucher.code}
+                </div>
+                <div className="text-sm">
+                  <strong>Value:</strong> {voucher.value}
+                </div>
+                <div>
+                  <img
+                    src={voucher.image}
+                    alt="Voucher"
+                    className="w-full h-auto"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
         )}
     </div>) : (
     <div className="flex items-center justify-center h-screen">
