@@ -32,6 +32,7 @@ public class PlaySessionController {
     @PutMapping("/end")
     public ResponseEntity<String> updateEndTime(@RequestBody PlaySessionUpdateRequest request) {
         boolean isUpdated = playSessionService.updateEndTime(request.getEventgameId(), request.getUserId(), request.getEndTime());
+        System.out.println("isUpdated: " + isUpdated);
         if (isUpdated) {
             return ResponseEntity.ok("Thời gian kết thúc đã được cập nhật.");
         } else {

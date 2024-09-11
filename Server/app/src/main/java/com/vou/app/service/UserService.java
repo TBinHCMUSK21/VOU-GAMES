@@ -26,5 +26,35 @@ public class UserService {
     public Optional<User> getUserByUsername(String username) {
         return userRepository.findByUsername(username);
     }
+
+    // Phương thức tìm người dùng theo userId
+    public Optional<User> getUserById(Long userId) {
+        return userRepository.findById(userId);
+    }
+
+    // Phương thức tìm người dùng theo số điện thoại
+    public Optional<User> getUserByPhoneNumber(String phoneNumber) {
+        return userRepository.findByPhoneNumber(phoneNumber);
+    }
+
+    // Phương thức tìm người dùng theo email
+    public Optional<User> getUserByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    // get friends
+    public Optional<User> getFriends(Long userId) {
+        return userRepository.findById(userId);
+    }
+
+    // Phương thức kiểm tra xem hai người dùng có phải là bạn không
+    public boolean isFriend(Long userId, Long friendId) {
+        Optional<User> user = userRepository.findById(userId);
+        Optional<User> friend = userRepository.findById(friendId);
+        if (user.isPresent() && friend.isPresent()) {
+            return userRepository.isFriend(user.get().getId(), friend.get().getId());
+        }
+        return false;
+    }
 }
 

@@ -14,4 +14,8 @@ public class EventGamesService {
     public List<EventGames> findGamesByEventId(Long eventId) {
         return eventGamesRepository.findGamesByEventId(eventId);
     }
+
+    public EventGames findEventGameById(Long eventGameId) {
+        return eventGamesRepository.findById(eventGameId).orElse(null);
+    }
 }

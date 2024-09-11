@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { Webhook } from "svix";
 import axios, { AxiosResponse } from 'axios';
+import {useUser} from "@clerk/nextjs";
 
 export async function POST(req: Request) {
 	const svix_id = headers().get("svix-id") ?? "";
@@ -124,6 +125,7 @@ export async function GET(req: Request) {
 		return new Response("Unauthorized", { status: 401 });
 	}
 
+	// const userId = sessionStorage.getItem('userId');
 	const url = `${process.env.NEXT_PUBLIC_API_URL}/api/games/users?userId=${userId}`;
 
 	const tokenString = sessionStorage.getItem('token');

@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -64,6 +65,17 @@ public class UserController {
             return ResponseEntity.ok(user.get());
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+    }
+
+    // get friends
+    @GetMapping("/{userId}/friends")
+    public ResponseEntity<?> getFriends(@PathVariable Long userId) {
+        Optional<User> user = userService.getUserById(userId);
+        if (user.isPresent()) {
+            return ResponseEntity.ok(user.get().getFriends());
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No friends found");
         }
     }
 }
