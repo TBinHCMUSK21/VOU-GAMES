@@ -40,9 +40,11 @@ type FriendsPlayTurnModalProps = {
   isOpen: boolean;
   eventGameId: number;
   onClose: () => void;
+  // onNumberClickChange auto +5 lượt chơi
+  onNumberClickChange: () => void;
 };
 
-const FriendsPlayTurnModal: React.FC<FriendsPlayTurnModalProps> = ({ userId, eventGameId, isOpen, onClose }) => {
+const FriendsPlayTurnModal: React.FC<FriendsPlayTurnModalProps> = ({ userId, eventGameId, isOpen, onClose, onNumberClickChange }) => {
   const [activeTab, setActiveTab] = useState<'friendsList' | 'receivedRequests'>('friendsList');
   const [friends, setFriends] = useState<Friend[]>([]);
   const [receivedRequests, setReceivedRequests] = useState<PlayTurnRequest[]>([]);
@@ -159,10 +161,31 @@ const FriendsPlayTurnModal: React.FC<FriendsPlayTurnModalProps> = ({ userId, eve
     }
   };
 
-  const handleShareOnFacebook = () => {
+  const handleShareOnFacebook = async () => {
     const shareUrl = `https://www.facebook.com/profile.php`;
     window.open(shareUrl, '_blank');
     // setChancesLeft(0); // After sharing, reduce the chances to 0
+    try {
+      const tokenString = sessionStorage.getItem('token');
+      if (!tokenString) {
+        throw new Error('Token not found');
+      }
+      const token: Token = JSON.parse(tokenString);
+      const accessToken = token.accessToken;
+        await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/games/play-turn-requests/share?userId=${userId}&eventGameId=${eventGameId}`, {},
+        {
+          headers:{
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
+          }
+        });
+        // after sharing, close the modal and increase the chances
+        onNumberClickChange();
+        onClose();
+    } catch (error) {
+      console.error('Error rejecting request:', error);
+      alert('Failed to reject the request.');
+    }
   };
 
   return (

@@ -28,6 +28,7 @@ const FriendsPage = () => {
     const fetchUserData = async () => {
       try {
         const userId = sessionStorage.getItem('userId');
+        console.log('User ID:', userId);
         //const response = await axios.get(`/api/user`);
         setUserId(parseInt(userId));
       } catch (error) {

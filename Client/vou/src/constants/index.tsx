@@ -1,7 +1,7 @@
 import IconEvent from "@/components/icons/IconEvent";
 import IconFavourite from "@/components/icons/IconFavourite";
 import IconGift from "@/components/icons/IconGift";
-import IconHistory from "@/components/icons/IconHistory";
+import IconVoucher from "@/components/icons/IconVoucher";
 import IconHome from "@/components/icons/IconHome";
 import IconUser from "@/components/icons/IconUser";
 import { TMenuItem } from "@/types/index.d";
@@ -24,13 +24,13 @@ export const menuItems: TMenuItem[] = [
 	},
 	{
 		url: "/history",
-		title: "Lịch sử",
-		icon: <IconHistory className="size-5" />,
+		title: "Bạn bè",
+		icon: <IconUser className="size-5" />,
 	},
 	{
 		url: "/user",
-		title: "Cá nhân",
-		icon: <IconUser className="size-5" />,
+		title: "Voucher",
+		icon: <IconVoucher className="size-5" />,
 	},
 	{
 		url: "/favourite",
