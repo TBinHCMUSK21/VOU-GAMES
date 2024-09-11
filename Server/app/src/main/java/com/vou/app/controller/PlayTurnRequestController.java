@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/play-turn-requests")
+@RequestMapping("/api/games/play-turn-requests")
 public class PlayTurnRequestController {
 
     @Autowired

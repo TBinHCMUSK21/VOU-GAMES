@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/friend-requests")
+@RequestMapping("/api/games/friend-requests")
 public class FriendRequestController {
     @Autowired
     private FriendRequestsService friendRequestsService;
