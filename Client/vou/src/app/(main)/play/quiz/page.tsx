@@ -49,7 +49,6 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 	const fetchQuestions = useCallback(async () => {
 		try {
 			const response = await axios.get(`/api/quiz/${eventgameId}`);
-			console.log(response.data.length);
 			if (response.status !== 200 || !response.data.length) {
 				setHasError(true);
 			} else {
