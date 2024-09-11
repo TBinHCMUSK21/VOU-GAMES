@@ -25,6 +25,11 @@ public class UserItem {
         this.quantity = quantity;
     }
 
+    public UserItem(Long userID, Long itemId, int quantity) {
+        this.id = new UserItemsId(itemId, userID);
+        this.quantity = quantity;
+    }
+
     // Constructor for creating UserItem with userID, itemId, and quantity
     public UserItem(Long userID, Long itemId, int quantity, Items items) {
         this.id = new UserItemsId(itemId, userID);
