@@ -95,7 +95,18 @@ const Page = ({
 
     const fetchEventDetails = async () => {
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/eventgames/get-event/${eventgameId}`);
+        const tokenString = sessionStorage.getItem('token');
+        if (!tokenString) {
+          throw new Error('Token not found');
+        }
+        const token: Token = JSON.parse(tokenString);
+        const accessToken = token.accessToken;
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/games/eventgames/get-event/${eventgameId}`,{
+          headers:{
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
+          }
+        });
         const data = response.data;
         console.log('data event', data);
         setGame(data);
@@ -112,7 +123,18 @@ const Page = ({
     const fetchShakeUserDetails = async (fetchedUserId: number) => {
       if (!fetchedUserId) return;
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/shakeuser/get-shake-user/${fetchedUserId}/${eventgameId}`);
+        const tokenString = sessionStorage.getItem('token');
+        if (!tokenString) {
+          throw new Error('Token not found');
+        }
+        const token: Token = JSON.parse(tokenString);
+        const accessToken = token.accessToken;
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/games/shakeuser/get-shake-user/${fetchedUserId}/${eventgameId}`,{
+          headers:{
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
+          }
+        });
         const data = response.data;
         console.log('data shake user', data);
         setNumberClick(data.quantity);
@@ -126,7 +148,18 @@ const Page = ({
     };
     const fetchFriends = async (fetchedUserId: number) => {
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/users/${fetchedUserId}/friends`);
+        const tokenString = sessionStorage.getItem('token');
+        if (!tokenString) {
+          throw new Error('Token not found');
+        }
+        const token: Token = JSON.parse(tokenString);
+        const accessToken = token.accessToken;
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/games/users/${fetchedUserId}/friends`,{
+          headers:{
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
+          }
+        });
         console.log('friends', response.data);
         setFriends(response.data);
       } catch (error) {
@@ -155,25 +188,21 @@ const Page = ({
         const accessToken = token.accessToken;
 
         // Make the AJAX request to the server
-        const response = await fetch('http://localhost:1110/api/games/items/scroll/1', {
+        const response = await fetch(`http://localhost:1110/api/games/items/scroll/eventGameId/${eventgameId}/userId/${userId}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${accessToken}`
           },
           body: JSON.stringify({}), // Add any necessary body content here
-        // Make the AJAX request to the server with Axios
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/items/scroll/eventGameId/${eventgameId}/userId/${userId}`, {
-          // Add any necessary data to be sent in the request body here
         });
-  
         // Check if the response is successful (status code 200-299)
         if (response.status !== 200) {
           throw new Error('Network response was not ok');
         }
   
         // Parse the JSON data
-        const data = response.data;
+        const data = await response.json();
   
         // Update state with the fetched data
         setItem(data);
@@ -199,9 +228,22 @@ const Page = ({
 
   const updateEndTime = async (request: PlaySessionUpdateRequest) => {
     try {
+      const tokenString = sessionStorage.getItem('token');
+      if (!tokenString) {
+        throw new Error('Token not found');
+      }
+      const token: Token = JSON.parse(tokenString);
+      const accessToken = token.accessToken;
+
       const response = await axios.put(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/playsessions/end`, // Adjust the URL as needed
-        request
+        `http://localhost:1110/api/games/games/playsessions/end`, // Adjust the URL as needed
+        request,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`,
+          },
+        }
       );
       console.log('Response:', response.data);
     } catch (error) {
@@ -212,42 +254,21 @@ const Page = ({
       }
     }
   };
-  const closeModal = () => {
-    setIsModalOpen(false);
-  };
 
-  useEffect(() => {
-    const fetchGameDetails = async () => {
+  const handleInventoryClick = async () => {
+    try{
       const tokenString = sessionStorage.getItem('token');
       if (!tokenString) {
         throw new Error('Token not found');
       }
       const token: Token = JSON.parse(tokenString);
       const accessToken = token.accessToken;
-
-      try {
-        const response = await fetch('http://localhost:1110/api/games/games/1', {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`
-          },
-        });
-        if (!response.ok) {
-          throw new Error('Failed to fetch game details');
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/games/user-items/user/${userId}/event/${eventgameId}`,{
+        headers:{
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
         }
-        const data: Game = await response.json(); // Type the data
-        setGame(data);
-      } catch (error) {
-        if (error instanceof Error) {
-          setError(error.message);
-        } else {
-          setError('An unknown error occurred');
-        }
-      }
-    };
-
-  const handleInventoryClick = async () => {
-    try{
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/user-items/user/${userId}/event/${eventgameId}`,{});
+      });
       console.log(response);
       // set items from data
       const data = response.data;
@@ -267,7 +288,18 @@ const Page = ({
 
   const handleTradeClick = async () => {
     try{
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/user-items/user/${userId}/event/${eventgameId}`,{});
+      const tokenString = sessionStorage.getItem('token');
+      if (!tokenString) {
+        throw new Error('Token not found');
+      }
+      const token: Token = JSON.parse(tokenString);
+      const accessToken = token.accessToken;
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/games/user-items/user/${userId}/event/${eventgameId}`,{
+        headers:{
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        }
+      });
       console.log(response);
       // set items from data
       const data = response.data;
@@ -282,7 +314,18 @@ const Page = ({
 
   const setGiftRequest = async (friendId:number,userItemId:number) => {
     try{
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/games/gift-history/add`,null,{
+      const tokenString = sessionStorage.getItem('token');
+      if (!tokenString) {
+        throw new Error('Token not found');
+      }
+      const token: Token = JSON.parse(tokenString);
+      const accessToken = token.accessToken;
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/games/gift-history/add`,{
+        headers:{
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        }
+      },{
         params: {
           giverId: userId,
           receiverId:friendId,

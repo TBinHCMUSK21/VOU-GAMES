@@ -25,7 +25,9 @@ type Friend = {
   user: UserDetails;
   friend: UserDetails;
 };
-  
+interface Token {
+  accessToken: string;
+}
 type PlayTurnRequest = {
   id: number;
   senderName: string;
@@ -50,7 +52,18 @@ const FriendsPlayTurnModal: React.FC<FriendsPlayTurnModalProps> = ({ userId, eve
     if (isOpen) {
       const fetchFriends = async () => {
         try {
-          const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/users/${userId}/friends`);
+          const tokenString = sessionStorage.getItem('token');
+          if (!tokenString) {
+            throw new Error('Token not found');
+          }
+          const token: Token = JSON.parse(tokenString);
+          const accessToken = token.accessToken;
+          const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/games/users/${userId}/friends`,{
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${accessToken}`
+            },
+          });
           setFriends(response.data);
         } catch (error) {
           console.error('Error fetching friends:', error);
@@ -59,7 +72,18 @@ const FriendsPlayTurnModal: React.FC<FriendsPlayTurnModalProps> = ({ userId, eve
 
       const fetchReceivedRequests = async () => {
         try {
-          const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/play-turn-requests/received/user/${userId}/event-game/${eventGameId}`);
+          const tokenString = sessionStorage.getItem('token');
+          if (!tokenString) {
+            throw new Error('Token not found');
+          }
+          const token: Token = JSON.parse(tokenString);
+          const accessToken = token.accessToken;
+          const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/games/play-turn-requests/received/user/${userId}/event-game/${eventGameId}`,{
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${accessToken}`
+            },
+          });
           console.log('Received Requests:', response.data);
           setReceivedRequests(response.data);
         } catch (error) {
@@ -74,7 +98,18 @@ const FriendsPlayTurnModal: React.FC<FriendsPlayTurnModalProps> = ({ userId, eve
 
   const handleRequestPlayTurn = async (friendId: number) => {
     try {
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/play-turn-requests/request`, null, {
+      const tokenString = sessionStorage.getItem('token');
+      if (!tokenString) {
+        throw new Error('Token not found');
+      }
+      const token: Token = JSON.parse(tokenString);
+      const accessToken = token.accessToken;
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/games/play-turn-requests/request`, {
+          headers:{
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
+          }
+        }, {
             params: {
               senderId: userId,
               receiverId: friendId,
@@ -90,7 +125,18 @@ const FriendsPlayTurnModal: React.FC<FriendsPlayTurnModalProps> = ({ userId, eve
 
   const handleAcceptRequest = async (requestId: number) => {
     try {
-        await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/play-turn-requests/respond`,null, { 
+      const tokenString = sessionStorage.getItem('token');
+      if (!tokenString) {
+        throw new Error('Token not found');
+      }
+      const token: Token = JSON.parse(tokenString);
+      const accessToken = token.accessToken;
+        await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/games/play-turn-requests/respond`,{
+          headers:{
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
+          }
+        }, { 
             params:{
                 requestId: requestId,
                 responseString: 'ACCEPTED'
@@ -105,7 +151,19 @@ const FriendsPlayTurnModal: React.FC<FriendsPlayTurnModalProps> = ({ userId, eve
 
   const handleRejectRequest = async (requestId: number) => {
     try {
-        await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/play-turn-requests/respond`,null, { 
+      const tokenString = sessionStorage.getItem('token');
+      if (!tokenString) {
+        throw new Error('Token not found');
+      }
+      const token: Token = JSON.parse(tokenString);
+      const accessToken = token.accessToken;
+        await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/games/play-turn-requests/respond`,
+        {
+          headers:{
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
+          }
+        }, { 
             params:{
                 requestId: requestId,
                 responseString: 'DECLINED'
