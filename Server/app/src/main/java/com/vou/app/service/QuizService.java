@@ -28,36 +28,43 @@ public class QuizService {
             "bg-green-500"
     };
 
-    public List<QuestionResponse> getQuizQuestions(Long gameId) {
-        List<QuestionResponse> questionDTOs = new ArrayList<>();
-        List<QuizQuestions> quizQuestions = quizQuestionRepository.findByGameId(gameId);
+    public List<QuestionResponse> getQuizQuestions(Long eventGameID) {
+        List<QuestionResponse> questionResponses = new ArrayList<>();
+        List<QuizQuestions> quizQuestions = quizQuestionRepository.findByEventGameId(eventGameID);
+
+        if (quizQuestions.isEmpty()) {
+            return questionResponses;
+        }
 
         for (QuizQuestions quizQuestion : quizQuestions) {
-            QuestionResponse questionDTO = new QuestionResponse();
-            questionDTO.setId(Math.toIntExact(quizQuestion.getId()));
-            questionDTO.setQuestionText(quizQuestion.getTitle());
-            questionDTO.setTimeRemaining(10);
+            QuestionResponse questionResponse = new QuestionResponse();
+            questionResponse.setId(Math.toIntExact(quizQuestion.getId()));
+            questionResponse.setQuestionText(quizQuestion.getTitle());
+            questionResponse.setFile(quizQuestion.getFile());
+            questionResponse.setTimeRemaining(10);
 
             List<OptionResponse> options = new ArrayList<>();
             List<QuizAnswer> quizAnswers = quizAnswerRepository.findByQuestionId(quizQuestion.getId());
 
-            for (int i = 0; i < quizAnswers.size(); i++) {
-                QuizAnswer quizAnswer = quizAnswers.get(i);
-                OptionResponse optionDTO = new OptionResponse();
-                optionDTO.setId(Math.toIntExact(quizAnswer.getId()));
-                optionDTO.setText(quizAnswer.getAnswerText());
-                optionDTO.setCorrect(quizAnswer.getIsCorrect());
+            if (!quizAnswers.isEmpty()) {
+                for (int i = 0; i < quizAnswers.size(); i++) {
+                    QuizAnswer quizAnswer = quizAnswers.get(i);
+                    OptionResponse optionResponse = new OptionResponse();
+                    optionResponse.setId(Math.toIntExact(quizAnswer.getId()));
+                    optionResponse.setText(quizAnswer.getAnswerText());
+                    optionResponse.setCorrect(quizAnswer.getIsCorrect());
 
-                String color = OPTION_COLORS[i % OPTION_COLORS.length];
-                optionDTO.setColor(color);
+                    String color = OPTION_COLORS[i % OPTION_COLORS.length];
+                    optionResponse.setColor(color);
 
-                options.add(optionDTO);
+                    options.add(optionResponse);
+                }
             }
 
-            questionDTO.setOptions(options);
-            questionDTOs.add(questionDTO);
+            questionResponse.setOptions(options);
+            questionResponses.add(questionResponse);
         }
 
-        return questionDTOs;
+        return questionResponses;
     }
 }

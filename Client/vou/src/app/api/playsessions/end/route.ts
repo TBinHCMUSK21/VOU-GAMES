@@ -8,6 +8,9 @@ interface Token {
 export async function PUT(request: Request) {
 	try {
 		const body = await request.json();
+<<<<<<< HEAD
+		const { eventgameId, userId, endTime } = body;
+=======
 		const { gameId, userId, endTime } = body;
 		const tokenString = sessionStorage.getItem('token');
 		if (!tokenString) {
@@ -15,18 +18,27 @@ export async function PUT(request: Request) {
 		}
 		const token: Token = JSON.parse(tokenString);
 		const accessToken = token.accessToken;
+>>>>>>> main
 
-		if (!gameId || !userId || !endTime) {
+		if (!eventgameId || !userId || !endTime) {
 			return NextResponse.json(
-				{ message: "Thiếu thông tin cần thiết (gameId, userId, hoặc endTime)" },
+				{
+					message:
+						"Thiếu thông tin cần thiết (eventGameId, userId, hoặc endTime)",
+				},
 				{ status: 400 }
 			);
 		}
 
 		const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
+<<<<<<< HEAD
+		const response = await axios.put(`${apiUrl}/api/v1/playsessions/end`, {
+			eventgameId,
+=======
 		const response = await axios.put(`${apiUrl}/api/games/playsessions/end`, {
 			gameId,
+>>>>>>> main
 			userId,
 			endTime,
 		}, {

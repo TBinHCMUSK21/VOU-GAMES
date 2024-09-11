@@ -1,5 +1,6 @@
 package com.vou.app;
 
+import org.apache.catalina.Manager;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
@@ -11,3 +12,4 @@ public class MainApplication {
 		SpringApplication.run(MainApplication.class, args);
 	}
 }
+

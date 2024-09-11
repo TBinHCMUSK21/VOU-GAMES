@@ -1,19 +1,27 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
-import IconMusic from "@/components/icons/IconMusic";
-import IconTrophy from "@/components/icons/IconTrophy";
-import { Question, QuizSearchParams } from "@/types";
 import axios from "axios";
+import PageNotFound from "@/app/not-found";
+import { Question, QuizSearchParams } from "@/types";
+import IconTrophy from "@/components/icons/IconTrophy";
+import IconMusic from "@/components/icons/IconMusic";
+import {useUser} from "@clerk/nextjs";
+interface PlaySessionUpdateRequest {
+	eventgameId: number;
+	userId: number;
+	endTime: string; // Adjust the type as needed, e.g., Date
+}
 
 interface Token {
 	accessToken: string;
 }
 
 const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
-	// Định nghĩa thời gian tối đa cho mỗi câu hỏi
 	const MAX_TIME = 5;
+	const {user}= useUser();
 
-	const { quiz } = searchParams;
+	const { eventgameId } = searchParams;
+
 	const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 	const [timeRemaining, setTimeRemaining] = useState(MAX_TIME);
 	const [questions, setQuestions] = useState<Question[]>([]);
@@ -24,15 +32,61 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 	const [waitingForOthers, setWaitingForOthers] = useState(false);
 	const [isAnswered, setIsAnswered] = useState(false);
 	const [earnedPoints, setEarnedPoints] = useState(0);
-
 	const [score, setScore] = useState(0);
-	const rank = 5;
+	const [rank] = useState(5);
 	const [username, setUsername] = useState("Loading...");
-	const [userId, setUserId] = useState(null);
 
+	const [userId, setUserId] = useState<number | null>(null);
+	const [loading, setLoading] = useState(true);
+	const [hasError, setHasError] = useState(false);
+	const [eventStartTime, setEventStartTime] = useState<string | null>(null);
+	const [startTimeMessage, setStartTimeMessage] = useState<string | null>(null);
+	const [hasEventStarted, setHasEventStarted] = useState(false);
+	const [audio, setAudio] = useState(null);
+	const [isPlaying, setIsPlaying] = useState(false);
+
+	const fetchUser = useCallback(async () => {
+		console.log("user: ", user);
+
+		const userId = sessionStorage.getItem('userId');
+		setUserId(parseInt(userId));
+		setUsername(user.username);
+	}, [user]);
 	/* Gọi API để lấy dữ liệu người dùng */
 	useEffect(() => {
-		const fetchUser = async () => {
+		fetchUser();
+	}, [fetchUser]);
+
+	/* Gọi API để kiểm tra sự kiện và lấy dữ liệu câu hỏi */
+	const fetchQuestions = useCallback(async () => {
+		const tokenString = sessionStorage.getItem("token");
+		if (!tokenString) {
+			throw new Error("Token not found");
+		}
+		const token: Token = JSON.parse(tokenString);
+		const accessToken = token.accessToken;
+
+		try {
+			const response = await axios.get(
+				`http://localhost:1110/api/games/quiz/${eventgameId}`,
+				{
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+					},
+					withCredentials: true,
+				}
+			);
+			setQuestions(response.data);
+			setTimeRemaining(MAX_TIME);
+		} catch (error) {
+			setHasError(true);
+			console.error("Error fetching quiz questions:", error);
+		}
+	}, [eventgameId]);
+
+	const fetchEventStartTime = useCallback(async () => {
+		setLoading(true);
+		try {
 			const tokenString = sessionStorage.getItem('token');
 			if (!tokenString) {
 				throw new Error('Token not found');
@@ -40,61 +94,54 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 			const token: Token = JSON.parse(tokenString);
 			const accessToken = token.accessToken;
 
-			try {
-				const response = await axios.get("http://localhost:1110/api/games/user", {
-					headers: {
-						'Authorization': `Bearer ${accessToken}`
-					},
-					withCredentials: true
-				});
-				console.log(response.data);
-
-				// Lưu userId từ API vào state
-				setUserId(response.data.data.clerkId); // Giả sử `clerkId` là `userId`
-
-				// Lưu username vào state
-				setUsername(response.data.data.name);
-			} catch (error) {
-				console.error("Error fetching user data:", error);
-				setUsername("Unknown User");
-			}
-		};
-		fetchUser();
-	}, []);
-
-	/* Gọi API để lấy dữ liệu câu hỏi */
-	const fetchQuestions = useCallback(async () => {
-		const tokenString = sessionStorage.getItem('token');
-		if (!tokenString) {
-			throw new Error('Token not found');
-		}
-		const token: Token = JSON.parse(tokenString);
-		const accessToken = token.accessToken;
-
-		try {
-			const response = await axios.get(`http://localhost:1110/api/games/quiz/${quiz}`, {
+			const response = await axios.get(`http://localhost:1110/api/games/events/start-time/${eventgameId}`, {
 				headers: {
 					'Authorization': `Bearer ${accessToken}`
 				},
 				withCredentials: true
 			});
-			setQuestions(response.data);
-			setTimeRemaining(MAX_TIME);
-		} catch (error) {
-			console.error("Error fetching quiz questions:", error);
-		}
-	}, [quiz]);
-	useEffect(() => {
-		fetchQuestions();
-	}, [fetchQuestions]);
 
-	/* */
+			if (response.data?.message) {
+				setStartTimeMessage(response.data.message);
+			} else if (response.data?.startTime) {
+				setEventStartTime(response.data.startTime);
+				const startTime = new Date(response.data.startTime).getTime();
+				const now = new Date().getTime();
+				const timeUntilStart = startTime - now;
+				if (timeUntilStart > 0) {
+					const timer = setTimeout(async () => {
+						await fetchQuestions();
+					}, timeUntilStart);
+
+					return () => clearTimeout(timer);
+				} else {
+					await fetchQuestions();
+				}
+			} else {
+				throw new Error("Unexpected response format from server.");
+			}
+		} catch (error) {
+			setHasError(true);
+			console.error("Error fetching event start time:", error);
+		} finally {
+			setLoading(false);
+		}
+	}, [eventgameId, fetchQuestions]);
+
+	useEffect(() => {
+		if (eventgameId) {
+			fetchEventStartTime();
+		} else {
+			setHasError(true);
+		}
+	}, [fetchEventStartTime, eventgameId]);
+
+	/* Handle Answer Submission */
 	const handleAnswerSubmit = useCallback(
 		(answerId: number | null) => {
 			if (!isQuizCompleted) {
 				setIsAnswered(true);
 				setWaitingForOthers(true);
-				// Tính điểm nếu người chơi trả lời đúng
 				const isCorrect = questions[currentQuestionIndex]?.options.some(
 					(option) => option.id === answerId && option.correct
 				);
@@ -112,8 +159,12 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 		[isQuizCompleted, questions, currentQuestionIndex, timeRemaining]
 	);
 
-	// Chuyển câu hỏi tiếp theo
+	/* Chuyển câu hỏi tiếp theo */
 	const handleNextQuestion = useCallback(() => {
+		if (audio) {
+			audio.pause(); // Dừng âm thanh hiện tại
+		}
+
 		setCurrentQuestionIndex((prevIndex) => {
 			if (prevIndex < questions.length - 1) {
 				const nextIndex = prevIndex + 1;
@@ -123,15 +174,16 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 				setWaitingForOthers(false);
 				setPopupTimer(5);
 				setIsAnswered(false);
+
 				return nextIndex;
 			} else {
 				setIsQuizCompleted(true);
 				return prevIndex;
 			}
 		});
-	}, [questions]);
+	}, [audio, questions]);
 
-	// Đếm ngược thời gian cho câu hỏi
+	/* Đếm ngược thời gian cho câu hỏi */
 	useEffect(() => {
 		if (timeRemaining > 0) {
 			const timer = setInterval(() => {
@@ -144,15 +196,15 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 		}
 	}, [timeRemaining, handleAnswerSubmit, isAnswered]);
 
-	// Xử lý đếm ngược thời gian chờ đợi
+	/* Xử lý đếm ngược thời gian chờ đợi */
 	useEffect(() => {
 		if (waitingForOthers && timeRemaining === 0) {
-			setWaitingForOthers(false); // Đóng popup chờ khi hết thời gian
-			setShowPopup(true); // Hiển thị popup kết quả
+			setWaitingForOthers(false);
+			setShowPopup(true);
 		}
 	}, [waitingForOthers, timeRemaining]);
 
-	// Xử lý đếm ngược thời gian cho popup kết quả (5 giây)
+	/* Xử lý đếm ngược thời gian cho popup kết quả (5 giây) */
 	useEffect(() => {
 		if (showPopup) {
 			const interval = setInterval(() => {
@@ -170,6 +222,38 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 		}
 	}, [showPopup, handleNextQuestion]);
 
+	useEffect(() => {
+		if (questions.length > 0 && currentQuestionIndex < questions.length) {
+			const currentQuestion = questions[currentQuestionIndex];
+
+			// Nếu câu hỏi có file âm thanh
+			if (currentQuestion.file) {
+				// Tạo đối tượng âm thanh
+				const audioFile = new Audio(currentQuestion.file);
+
+				// Phát âm thanh khi chuyển câu hỏi mới
+				audioFile.play().catch((error) => {
+					console.error("Lỗi phát âm thanh:", error);
+				});
+
+				// Cleanup: dừng âm thanh khi câu hỏi thay đổi hoặc component unmount
+				return () => {
+					audioFile.pause();
+					audioFile.currentTime = 0; // Đặt lại thời gian phát về 0
+				};
+			}
+		}
+	}, [currentQuestionIndex, questions]);
+
+
+	useEffect(() => {
+		if (audio) {
+			audio.pause();
+			audio.currentTime = 0; // Đặt lại thời gian bắt đầu của audio
+		}
+	}, [currentQuestionIndex, audio]);
+
+
 	const handleCloseQuizCompletedPopup = async () => {
 		if (!userId) {
 			console.error("UserId không tồn tại, không thể gửi kết quả.");
@@ -179,33 +263,43 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 			userId: userId,
 			score: score,
 			rank: rank,
-			gameId: quiz,
+			eventGameId: eventgameId,
 		};
 		try {
-			const tokenString = sessionStorage.getItem('token');
+			const tokenString = sessionStorage.getItem("token");
 			if (!tokenString) {
-				throw new Error('Token not found');
+				throw new Error("Token not found");
 			}
 			const token: Token = JSON.parse(tokenString);
 			const accessToken = token.accessToken;
 
-			await axios.post("http://localhost:1110/api/games/quiz/result", quizResult, {
-				headers: {
-					'Authorization': `Bearer ${accessToken}`
-				},
-				withCredentials: true
-			});
+			await axios.post(
+				"http://localhost:1110/api/games/quiz/result",
+				quizResult,
+				{
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+					},
+					withCredentials: true,
+				}
+			);
 
-			await axios.put(`http://localhost:1110/api/games/playsessions/end`, {
-				gameId: quiz,
+			const requestPayload: PlaySessionUpdateRequest = {
+				eventgameId: Number(eventgameId),
 				userId: userId,
 				endTime: new Date().toISOString(),
-			},{
-				headers: {
-					'Authorization': `Bearer ${accessToken}`
-				},
-				withCredentials: true
-			});
+			};
+
+			const response = await axios.put(
+				`http://localhost:1110/api/games/playsessions/end`, // Adjust the URL as needed
+				requestPayload,
+				{
+					headers: {
+						'Content-Type': 'application/json',
+						'Authorization': `Bearer ${accessToken}`,
+					},
+				}
+			);
 		} catch (error) {
 			console.error("Gửi kết quả thất bại:", error);
 		}
@@ -213,13 +307,41 @@ const Page = ({ searchParams }: { searchParams: QuizSearchParams }) => {
 		setIsQuizCompleted(false);
 	};
 
+	if (loading) {
+		return <>Loading...</>;
+	}
+
+	if (hasError) {
+		return <PageNotFound />;
+	}
+
+	if (startTimeMessage) {
+		return (
+			<div className="flex flex-col items-center justify-center scrollbar-hide text-center overflow-y-scroll h-[calc(100vh-100px)] scrollbar-hide ">
+				<div className=" min-h-[120px] rounded-lg">
+					<h1 className="text-3xl font-bold text-primary mb-4">
+						Sự kiện chưa bắt đầu
+					</h1>
+					<p className="text-gray-700 text-lg">{startTimeMessage}</p>
+				</div>
+			</div>
+		);
+	}
+
+	// if (!hasEventStarted) {
+	// 	return (
+	// 		<div className="flex flex-col items-center justify-center h-screen bg-gray-100 text-center">
+	// 			<h1 className="text-3xl font-bold">Vui lòng đợi sự kiện bắt đầu...</h1>
+	// 		</div>
+	// 	);
+	// }
+
 	const currentQuestion = questions[currentQuestionIndex];
 	const totalQuestions = questions.length;
 
 	const currentQuestionText = `${
 		currentQuestionIndex + 1
 	} of ${totalQuestions}`;
-
 	return (
 		<>
 			<div className="flex flex-col items-center justify-start w-full">
