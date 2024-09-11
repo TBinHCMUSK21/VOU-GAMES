@@ -1,6 +1,5 @@
 package com.vou.app.entity;
 
-
 import jakarta.persistence.*;
 
 @Entity
@@ -11,8 +10,8 @@ public class QuizResult {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "gameid", nullable = false)
-    private Long gameId;
+    @Column(name = "eventgameid", nullable = false)
+    private Long eventGameId;
 
     @Column(name = "user_id", nullable = false)
     private String userId;
@@ -24,7 +23,6 @@ public class QuizResult {
     private int rank;
 
     // Getters và Setters
-
     public Long getId() {
         return id;
     }
@@ -33,12 +31,12 @@ public class QuizResult {
         this.id = id;
     }
 
-    public Long getGameId() {
-        return gameId;
+    public Long getEventGameId() {
+        return eventGameId;
     }
 
-    public void setGameId(Long gameId) {
-        this.gameId = gameId;
+    public void setEventGameId(Long eventGameId) {
+        this.eventGameId = eventGameId;
     }
 
     public String getUserId() {

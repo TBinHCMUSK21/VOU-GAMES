@@ -1,13 +1,13 @@
-import axios, { AxiosResponse } from 'axios';
+import axios from "axios";
 
 const PLAYSESSION_API_BASE_URL = "http://localhost:1110/api/games/playsessions";
 
 interface Token {
-    accessToken: string;
+	accessToken: string;
 }
 
 interface PlaySessions {
-    [key: string]: any;
+	[key: string]: any;
 }
 
 class PlaySessionsService {

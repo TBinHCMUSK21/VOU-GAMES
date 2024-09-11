@@ -9,11 +9,11 @@ export async function POST(request: Request) {
 	try {
 		const body = await request.json();
 
-		const { userId, score, rank, gameId } = body;
+		const { userId, score, rank, eventGameId } = body;
 
 		const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-		if (!userId || score === undefined || rank === undefined || !gameId) {
+		if (!userId || score === undefined || rank === undefined || !eventGameId) {
 			return NextResponse.json(
 				{ message: "Thiếu thông tin cần thiết trong body" },
 				{ status: 400 }
@@ -31,12 +31,16 @@ export async function POST(request: Request) {
 			userId,
 			score,
 			rank,
+<<<<<<< HEAD
+			eventGameId,
+=======
 			gameId,
 		}, {
 			headers: {
 				'Authorization': `Bearer ${accessToken}`
 			},
 			withCredentials: true
+>>>>>>> main
 		});
 
 		return NextResponse.json(

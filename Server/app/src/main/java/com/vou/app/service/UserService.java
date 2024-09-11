@@ -20,9 +20,6 @@ public class UserService {
 
     // Phương thức tìm người dùng theo clerkId
     public Optional<User> getUserByClerkId(String clerkId) {
-//        Optional<User> user = userRepository.findByClerkId(clerkId);
-//        System.out.println(user.getId().toString());
-//        return user;
         return userRepository.findByClerkId(clerkId);
     }
 

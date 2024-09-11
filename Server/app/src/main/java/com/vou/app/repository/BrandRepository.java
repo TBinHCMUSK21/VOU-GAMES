@@ -1,9 +1,9 @@
 package com.vou.app.repository;
 
-import com.vou.app.entity.Brand;
+import com.vou.app.entity.Brands;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 
-public interface BrandRepository extends JpaRepository<Brand, Long> {
-    Brand findByName(String name);
+public interface BrandRepository extends JpaRepository<Brands, Long> {
+    Brands findByName(String name);
 }

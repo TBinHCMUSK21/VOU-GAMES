@@ -51,6 +51,9 @@ public class User {
     @Column(name = "username", length = 45)
     private String username;
 
+    @Column(name = "status", nullable = false)
+    private String status;
+
     // Bidirectional relationship for friends
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @JsonIgnore
@@ -68,6 +71,7 @@ public class User {
 
     public User() {}
 
+
     public User(String clerkId, String avatar, LocalDateTime createdAt, String dob, String email, String gender, String name, String phoneNumber, String role, String username) {
         this.clerkId = clerkId;
         this.avatar = avatar;
@@ -79,6 +83,7 @@ public class User {
         this.phoneNumber = phoneNumber;
         this.role = role;
         this.username = username;
+        this.status="ACTIVE";
     }
 
     // Adding friend using UserFriend entity
@@ -104,6 +109,11 @@ public class User {
             this.friends.remove(friend);
             friend.getFriends().remove(this); // Maintain bidirectional consistency
         }
+    }
+
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
     // equals() and hashCode() methods
