@@ -1,10 +1,13 @@
 package com.vou.app.controller;
 
 import com.sun.java.accessibility.util.EventID;
+import com.vou.app.entity.EventGames;
 import com.vou.app.entity.Items;
 import com.vou.app.entity.UserItem;
 import com.vou.app.entity.UserItemsId;
+import com.vou.app.service.EventGamesService;
 import com.vou.app.service.ItemService;
+import com.vou.app.service.ShakeUserService;
 import com.vou.app.service.UserItemService;
 import netscape.javascript.JSObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,10 +27,20 @@ public class ItemController {
     @Autowired
     private UserItemService userItemService;
 
-    @PostMapping("/scroll/eventId/{eventId}/userId/{userId}")
-    public ResponseEntity<Object> getItemToScroll(@PathVariable("eventId") Long EventID, @PathVariable("userId") Long UserID) {
+    @Autowired
+    private EventGamesService eventGamesService;
+
+    @Autowired
+    private ShakeUserService shakeUserService;
+
+    @PostMapping("/scroll/eventGameId/{eventGameId}/userId/{userId}")
+    public ResponseEntity<Object> getItemToScroll(@PathVariable("eventGameId") Long EventGameID,
+                                                  @PathVariable("userId") Long UserID) {
+        // get ivent id for eventgame id
+        EventGames eventGame = eventGamesService.findEventGameById(EventGameID);
+        Long eventID = eventGame.getEvent().getId();
         // get items that have event id
-        List<Items> items = itemService.getItemByEventId(EventID);
+        List<Items> items = itemService.getItemByEventId(eventID);
         // roll random and return the item
         // Check if there are any items
         if (items.isEmpty()) {
@@ -48,6 +61,9 @@ public class ItemController {
         }
         System.out.println("" + userItem.getItems() + userItem.getQuantity());
         userItemService.saveUserItem(userItem);
+        // reduce quantity of shakeuser
+        shakeUserService.adjustQuantity(UserID, EventGameID, -1);
+
         // Return the random item
         return ResponseEntity.ok(randomItem);
     }

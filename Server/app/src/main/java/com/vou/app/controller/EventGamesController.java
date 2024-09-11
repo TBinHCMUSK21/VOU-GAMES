@@ -1,6 +1,7 @@
 package com.vou.app.controller;
 
 import com.vou.app.entity.EventGames;
+import com.vou.app.entity.Events;
 import com.vou.app.service.EventGamesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,5 +21,13 @@ public class EventGamesController {
     public ResponseEntity<List<EventGames>> getGamesByEventId(@PathVariable Long eventId) {
         List<EventGames> games = eventGamesService.findGamesByEventId(eventId);
         return ResponseEntity.ok(games);
+    }
+
+    // get event from event game id
+    @GetMapping("/get-event/{eventGameId}")
+    public ResponseEntity<Events> getEventByEventGameId(@PathVariable Long eventGameId) {
+        EventGames event = eventGamesService.findEventGameById(eventGameId);
+        Events events = event.getEvent();
+        return ResponseEntity.ok(events);
     }
 }

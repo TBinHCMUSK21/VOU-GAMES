@@ -38,4 +38,37 @@ public class ShakeUserService {
 
         return null;
     }
+
+    // increase quantity of shake user find by user id and event game id
+    public ShakeUser adjustQuantity(final Long userId, final Long eventGameId, final int quantity) {
+        Optional<ShakeUser> shakeUser = shakeUserRepository.findByPlayerIdAndEventGamesId(userId, eventGameId);
+
+        if (shakeUser.isPresent()) {
+            shakeUser.get().setQuantity(shakeUser.get().getQuantity() + quantity);
+            return shakeUserRepository.save(shakeUser.get());
+        }
+        else{
+            // create new shake user
+            Optional<EventGames> eventGames = eventGamesRepository.findById(eventGameId);
+            Optional<User> user = userRepository.findById(userId);
+
+            if (eventGames.isPresent() && user.isPresent()) {
+                ShakeUser newShakeUser = ShakeUser
+                                        .builder()
+                                        .eventGames(eventGames.get())
+                                        .player(user.get())
+                                        .quantity(9)
+                                        .build();
+
+                return shakeUserRepository.save(newShakeUser);
+            }
+        }
+
+        return null;
+    }
+
+    public ShakeUser getShakeUserByUserIdAndEventGameId(final Long userId, final Long eventGameId) {
+        return shakeUserRepository.findByPlayerIdAndEventGamesId(userId, eventGameId).orElse(null);
+    }
+
 }
