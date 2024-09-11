@@ -11,6 +11,10 @@ type FriendRequest = {
   status: string;
 };
 
+interface Token {
+  accessToken: string;
+}
+
 const FriendsPage = () => {
   const [activeTab, setActiveTab] = useState('pending');
   const [pendingRequests, setPendingRequests] = useState([]);
@@ -23,8 +27,9 @@ const FriendsPage = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await axios.get(`/api/user`);
-        setUserId(response.data.data.id);
+        const userId = sessionStorage.getItem('userId');
+        //const response = await axios.get(`/api/user`);
+        setUserId(parseInt(userId));
       } catch (error) {
         console.error('Error fetching user data:', error);
         setError('Failed to fetch user data');
@@ -41,9 +46,24 @@ const FriendsPage = () => {
       const fetchRequests = async () => {
         setLoading(true);
         try {
+          const tokenString = sessionStorage.getItem('token');
+          if (!tokenString) {
+            throw new Error('Token not found');
+          }
+          const token: Token = JSON.parse(tokenString);
+          const accessToken = token.accessToken;
+
           const [pendingResponse, sentResponse] = await Promise.all([
-            axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/friend-requests/requests/received/${userId}`),
-            axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/friend-requests/requests/sent/${userId}`)
+            axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/games/friend-requests/requests/received/${userId}`, {
+              headers:{
+                'Authorization': `Bearer ${accessToken}`
+              }
+            }),
+            axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/games/friend-requests/requests/sent/${userId}`, {
+              headers:{
+                'Authorization': `Bearer ${accessToken}`
+              }
+            })
           ]);
 		  console.log('Pending Requests Response:', pendingResponse);
           console.log('Sent Requests Response:', sentResponse);
@@ -63,10 +83,19 @@ const FriendsPage = () => {
 
   const handleSendRequest = async () => {
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/friend-requests/send`, null, {
+      const tokenString = sessionStorage.getItem('token');
+      if (!tokenString) {
+        throw new Error('Token not found');
+      }
+      const token: Token = JSON.parse(tokenString);
+      const accessToken = token.accessToken;
+
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/games/friend-requests/send`, null, {
         params: {
           senderId: userId,
           searchInput: phoneNumber
+        }, headers:{
+          'Authorization': `Bearer ${accessToken}`
         }
       });
 
@@ -79,7 +108,18 @@ const FriendsPage = () => {
 
   const handleRequestUpdate = async (requestId: number, action: 'accept' | 'deny') => {
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/friend-requests/${requestId}/${action}`);
+      const tokenString = sessionStorage.getItem('token');
+      if (!tokenString) {
+        throw new Error('Token not found');
+      }
+      const token: Token = JSON.parse(tokenString);
+      const accessToken = token.accessToken;
+
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/games/friend-requests/${requestId}?status=${action}`,{}, {
+        headers:{
+          'Authorization': `Bearer ${accessToken}`
+        }
+      });
       console.log(response.data); // You can update the UI based on the response
       // Update the requests state after accepting or denying
       setPendingRequests(prevRequests =>

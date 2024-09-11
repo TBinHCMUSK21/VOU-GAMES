@@ -9,6 +9,7 @@ import FriendsPlayTurnModal  from '@/components/playturn/FriendsPlayTurnModal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
+import {useUser} from "@clerk/nextjs";
 interface Game {
   id: number;
   name: string;
@@ -81,13 +82,11 @@ const Page = ({
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await axios.get("/api/user");
-        const fetchedUserId = Number(response.data.data.id);
-        setUserId(fetchedUserId);  // Set the userId
-
+        const fetchedUserId = sessionStorage.getItem('userId');
         // After setting the userId, fetch shake user details
-        fetchShakeUserDetails(fetchedUserId);  // Pass the userId here
-        fetchFriends(fetchedUserId);
+        fetchShakeUserDetails(parseInt(fetchedUserId));  // Pass the userId here
+        fetchFriends(parseInt(fetchedUserId));
+        setUserId(parseInt(fetchedUserId));
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
@@ -236,7 +235,7 @@ const Page = ({
       const accessToken = token.accessToken;
 
       const response = await axios.put(
-        `http://localhost:1110/api/games/games/playsessions/end`, // Adjust the URL as needed
+        `http://localhost:1110/api/games/playsessions/end`, // Adjust the URL as needed
         request,
         {
           headers: {
@@ -320,17 +319,9 @@ const Page = ({
       }
       const token: Token = JSON.parse(tokenString);
       const accessToken = token.accessToken;
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/games/gift-history/add`,{
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/games/gift-history/add?giverId=${userId}&receiverId=${friendId}&itemId=${userItemId}&eventGameId=${eventgameId}`,{}, {
         headers:{
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${accessToken}`
-        }
-      },{
-        params: {
-          giverId: userId,
-          receiverId:friendId,
-          itemId:userItemId,
-          eventGameId:eventgameId
         }
       });
       console.log(response);

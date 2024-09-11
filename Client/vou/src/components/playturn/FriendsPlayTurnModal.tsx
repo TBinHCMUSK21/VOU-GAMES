@@ -104,17 +104,11 @@ const FriendsPlayTurnModal: React.FC<FriendsPlayTurnModalProps> = ({ userId, eve
       }
       const token: Token = JSON.parse(tokenString);
       const accessToken = token.accessToken;
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/games/play-turn-requests/request`, {
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/games/play-turn-requests/request?senderId=${userId}&receiverId=${friendId}&eventGameId=${eventGameId}`, {},{
           headers:{
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${accessToken}`
           }
-        }, {
-            params: {
-              senderId: userId,
-              receiverId: friendId,
-              eventGameId: eventGameId
-            }
         });
         alert('Play turn request sent!');
     } catch (error) {
@@ -131,16 +125,10 @@ const FriendsPlayTurnModal: React.FC<FriendsPlayTurnModalProps> = ({ userId, eve
       }
       const token: Token = JSON.parse(tokenString);
       const accessToken = token.accessToken;
-        await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/games/play-turn-requests/respond`,{
+        await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/games/play-turn-requests/respond?requestId=${requestId}&responseString=ACCEPTED`, {}, {
           headers:{
-            'Content-Type': 'application/json',
             'Authorization': `Bearer ${accessToken}`
           }
-        }, { 
-            params:{
-                requestId: requestId,
-                responseString: 'ACCEPTED'
-            }
         });
         alert('Play turn request accepted!');
     } catch (error) {
@@ -157,17 +145,12 @@ const FriendsPlayTurnModal: React.FC<FriendsPlayTurnModalProps> = ({ userId, eve
       }
       const token: Token = JSON.parse(tokenString);
       const accessToken = token.accessToken;
-        await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/games/play-turn-requests/respond`,
+        await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/games/play-turn-requests/respond?requestId=${requestId}&responseString=DECLINED`, {},
         {
           headers:{
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${accessToken}`
           }
-        }, { 
-            params:{
-                requestId: requestId,
-                responseString: 'DECLINED'
-            }
         });
         alert('Play turn request rejected.');
     } catch (error) {

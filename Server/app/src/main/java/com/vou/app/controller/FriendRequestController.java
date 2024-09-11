@@ -5,6 +5,7 @@ import com.vou.app.entity.FriendRequests;
 import com.vou.app.entity.User;
 import com.vou.app.service.FriendRequestsService;
 import com.vou.app.service.UserService;
+import jakarta.websocket.server.PathParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -70,8 +71,8 @@ public class FriendRequestController {
     }
 
     // update friend request
-    @PostMapping("/{requestId}/{status}")
-    public ResponseEntity<String> updateFriendRequest(@PathVariable Long requestId, @PathVariable String status) {
+    @PostMapping("/{requestId}")
+    public ResponseEntity<String> updateFriendRequest(@PathVariable Long requestId, @RequestParam String status) {
         if(status.equals("accept")) {
             return acceptFriendRequest(requestId);
         } else if(status.equals("deny")) {
